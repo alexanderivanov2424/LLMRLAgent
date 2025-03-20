@@ -6,7 +6,12 @@ This project uses Poetry for dependency management. To get started:
 
 1. Make sure you have Poetry installed:
    ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
+   # Install pipx if you haven't already
+   brew install pipx
+   pipx ensurepath
+   
+   # Install Poetry using pipx
+   pipx install poetry
    ```
 
 2. Clone the repository:
