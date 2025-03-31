@@ -19,6 +19,12 @@ class ActionResponse(BaseModel):
     action: str = Field(description="The chosen action from the available actions")
     reasoning: str = Field(description="The reasoning behind choosing this action")
 
+# TODO This isn't a general RL agent, call it LLMRL agent
+# TODO reparent to BaseAgent and implement base functions
+
+# TODO move prompts out into a config file so we can do precise versioning. 
+# Doesn't matter if it is still string constants in code it just shouldn't be part of the LLMRL agent itself
+# we want to be able to create multiple of these agents with different sets of prompts and save all the different prompts we have tried
 
 class RLAgent:
     def __init__(
