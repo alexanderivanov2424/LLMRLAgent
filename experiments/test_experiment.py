@@ -7,6 +7,7 @@ from gymnasium import envs
 
 from agents.base_agent import BaseAgent
 from agents.random_agent import RandomAgent
+
 from utils.experiment import ExperimentData
 
 # show all available envs
@@ -38,7 +39,7 @@ agent = RandomAgent(env.action_space, env.observation_space)
 
 env.reset(seed=0)
 
-for episode in range(10):
+for episode in range(50):
    run_episode(experiment, env, agent, episode)
 
 env.close()

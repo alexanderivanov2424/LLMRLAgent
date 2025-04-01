@@ -14,7 +14,7 @@ This class should also be able to load experiments so that we can more easily pl
 
 """
 
-SAVE_DIR = "./experiment_data"
+EXPERIMENT_SAVE_DIR = "./experiment_data"
 
 
 KEY_EXP_NAME = "exp_name"
@@ -37,7 +37,7 @@ class ExperimentData:
 
   def get_file_path(self):
     # TODO we want more information to be stored in the experiment data object at construction to make it easier to disambiguate
-    return os.path.join(SAVE_DIR, self.exp_name + ".json")
+    return os.path.join(EXPERIMENT_SAVE_DIR, self.exp_name + ".json")
 
   def save(self):
     path = self.get_file_path()
@@ -59,27 +59,43 @@ class ExperimentData:
   
 
   ###############################
-  
-  # TODO more helper functions to save new bits of data into the experiment blob
+  # functions to save bits of data into the blob
+
+  # The goal here is to not have to manually track the dictionary keys outside of this file
 
   def log_meta_data(self, key, value):
     self.data[KEY_META_DATA][key] = value
 
-  
-
   def log_agent_episode_rewards(self, agent, episode_number, rewards_list):
-    agent_name = agent.get_agent_name()
+    agent_ID = agent.get_agent_ID()
 
     # ensure we have a dictionary for all the agent data
-    if not agent_name in self.data[KEY_AGENT]:
-      self.data[KEY_AGENT][agent_name] = {}
+    if not agent_ID in self.data[KEY_AGENT]:
+      self.data[KEY_AGENT][agent_ID] = {}
 
     # ensure we have a key for episode data in the agent dictionary
-    if not KEY_AGENT_EPISODE in self.data[KEY_AGENT][agent_name]:
-      self.data[KEY_AGENT][agent_name][KEY_AGENT_EPISODE] = {}
+    if not KEY_AGENT_EPISODE in self.data[KEY_AGENT][agent_ID]:
+      self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE] = []
 
     # ensure that we have an entry for this episode  
-    if not episode_number in self.data[KEY_AGENT][agent_name][KEY_AGENT_EPISODE]:
-      self.data[KEY_AGENT][agent_name][KEY_AGENT_EPISODE][episode_number] = {}
-    
-    self.data[KEY_AGENT][agent_name][KEY_AGENT_EPISODE][episode_number][KEY_AGENT_EPISODE_REWARDS] = rewards_list
+    episode_count = len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
+    if episode_count < episode_number:
+      print("[WARNING] Logged episode number {episode_number} doesn't correspond to saved episode count {episode_count}. Did you skip an episode?")
+
+    # ensure that we have a dictionary for episode data 
+    if episode_count == episode_number:
+      self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE].append({})
+
+    self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][KEY_AGENT_EPISODE_REWARDS] = rewards_list
+
+  ###############################
+  # functions to get out the data more easily (for plots, visuals)
+
+  def get_agents(self):
+    return self.data[KEY_AGENT].keys()
+  
+  def get_agent_epsiode_count(self, agent_ID):
+    return len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
+  
+  def get_agent_episode_rewards(self, agent_ID, episode_number):
+    return self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][KEY_AGENT_EPISODE_REWARDS]
