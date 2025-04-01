@@ -7,6 +7,10 @@ from agents.random_agent import RandomAgent
 from agents.llm_agent import LLMAgent
 
 from utils.experiment import ExperimentData
+from environment.environment import create_environment, get_available_environments
+
+# Show all available envs (can add more in environment/environment.py)
+#print(get_available_environments())
 
 
 def run_episode(
@@ -32,8 +36,11 @@ def run_episode(
         experiment.log_agent_episode_rewards(agent, episode_number, rewards)
 
 
-experiment = ExperimentData("test_random_agent")
-env = gym.make("MiniGrid-Empty-5x5-v0")  # render_mode="human" for visualization
+
+# Choose test environment here based on dictionary keys in environment/environment.py
+env_name = "minigrid_empty"
+experiment = ExperimentData(f"test_random_agent_{env_name}")
+env = create_environment(env_name=env_name)  
 # agent = RandomAgent(env.action_space, env.observation_space)
 agent = LLMAgent(
     env.action_space,
