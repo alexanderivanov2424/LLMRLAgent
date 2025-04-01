@@ -5,38 +5,42 @@ import gymnasium as gym
 import minigrid
 from gymnasium import envs
 
+from agents.base_agent import BaseAgent
 from agents.random_agent import RandomAgent
 from utils.experiment import ExperimentData
 
 # show all available envs
 #print(envs.registry.keys())
 
+
+def run_episode(experiment : ExperimentData, env, agent : BaseAgent, episode_number, max_step=1000):
+   
+   rewards = []
+
+   observation, info = env.reset()
+   for step in range(max_step):
+      action = agent.policy(observation)
+      observation, reward, terminated, truncated, info = env.step(action)
+      agent.update(observation, action, reward, terminated, truncated)
+
+      rewards.append(reward)
+
+      if terminated or truncated:
+          break
+    
+      experiment.log_agent_episode_rewards(agent, episode_number, rewards)
+
+
+experiment = ExperimentData("test_random_agent")
+
 env = gym.make("MiniGrid-Empty-5x5-v0")#, render_mode="human")
-
-
-# demo save/load experiment
-experiment = ExperimentData("test_exp")
-experiment.log_meta_data("test", "some data")
-experiment.save()
-
-experiment_2 = ExperimentData.load("test_exp")
-print(experiment_2.meta_data)
-
-
-# demo random agent in environment
-
 agent = RandomAgent(env.action_space, env.observation_space)
 
+env.reset(seed=0)
 
-observation, info = env.reset(seed=42)
-for _ in range(1000):
-   
-   action = agent.policy(observation)
-   observation, reward, terminated, truncated, info = env.step(action)
-
-   agent.update(observation, action, reward, terminated, truncated)
-
-   if terminated or truncated:
-      observation, info = env.reset()
+for episode in range(10):
+   run_episode(experiment, env, agent, episode)
 
 env.close()
+
+experiment.save()
