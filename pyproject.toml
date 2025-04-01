@@ -10,6 +10,7 @@ python = "^3.10"
 pydantic = "^2.10.6"
 ollama = "^0.4.7"
 gymnasium = "^1.1.1"
+minigrid = "^3.0.0"
 
 
 [build-system]
