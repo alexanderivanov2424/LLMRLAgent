@@ -29,4 +29,3 @@ plt.title("Random Agent Cumulative Reward Over Episode #")
 # TODO we probably want automatically generated file names for the plots too. We want it to be easier to trace which plot came from which experiment
 path = os.path.join(PLOT_SAVE_DIR, experiment.exp_name + ".png")
 plt.savefig(path)
-plt.show()
