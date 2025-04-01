@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List
 from ollama import chat
-
+from gymnasium import Space
 from agents.base_agent import BaseAgent
 
 
@@ -22,17 +22,13 @@ class ActionResponse(BaseModel):
     reasoning: str = Field(description="The reasoning behind choosing this action")
 
 
-# TODO move prompts out into a config file so we can do precise versioning.
-# Doesn't matter if it is still string constants in code it just shouldn't be part of the LLMRL agent itself
-# we want to be able to create multiple of these agents with different sets of prompts and save all the different prompts we have tried
-
-
 class LLMAgent(BaseAgent):
     def __init__(
         self,
+        action_space: Space,
+        observation_space: Space,
         model: str,
         base_prompt: str,
-        action_space: List[Action],
     ):
         """
         Initialize the RL agent.
@@ -42,7 +38,8 @@ class LLMAgent(BaseAgent):
             base_prompt: The initial prompt/instructions for the agent
             action_space: List of possible actions the agent can take
         """
-        self.action_space = action_space
+        super().__init__(action_space, observation_space)
+
         self.context_history = []
         self.base_prompt = base_prompt
         self.model = model
@@ -51,7 +48,6 @@ class LLMAgent(BaseAgent):
         return "LLMAgent"
 
     def policy(self, observation):
-        # TODO: I don't know how to implement this
         return super().policy(observation)
 
     def update(self, observation, action, reward, terminated, truncated):

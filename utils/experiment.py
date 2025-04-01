@@ -1,5 +1,7 @@
 import os
 import json
+from typing import List
+from agents.base_agent import BaseAgent
 
 """
 Class for loading/saving experimental data. 
@@ -26,76 +28,87 @@ KEY_AGENT_EPISODE_REWARDS = "rewards"
 
 class ExperimentData:
 
-  def __init__(self, exp_name):
-    self.data = {}
+    def __init__(self, exp_name):
+        self.data = {}
 
-    self.exp_name = exp_name
-    self.data[KEY_EXP_NAME] = exp_name
-    self.data[KEY_META_DATA] = {}
+        self.exp_name = exp_name
+        self.data[KEY_EXP_NAME] = exp_name
+        self.data[KEY_META_DATA] = {}
 
-    self.data[KEY_AGENT] = {}
+        self.data[KEY_AGENT] = {}
 
-  def get_file_path(self):
-    # TODO we want more information to be stored in the experiment data object at construction to make it easier to disambiguate
-    return os.path.join(EXPERIMENT_SAVE_DIR, self.exp_name + ".json")
+    def get_file_path(self):
+        # TODO we want more information to be stored in the experiment data object at construction to make it easier to disambiguate
+        return os.path.join(EXPERIMENT_SAVE_DIR, self.exp_name + ".json")
 
-  def save(self):
-    path = self.get_file_path()
-    with open(path, 'w', encoding='utf-8') as fp:
-      json.dump(self.data, fp, ensure_ascii=False, sort_keys=True)
-    
+    def save(self):
+        path = self.get_file_path()
 
-  def load(experiment_name):
-    experiment = ExperimentData(experiment_name)
+        # make sure the directory exists
+        os.makedirs(EXPERIMENT_SAVE_DIR, exist_ok=True)
 
-    path = experiment.get_file_path()
-    with open(path, 'r', encoding='utf-8') as fp:
-      data = json.load(fp)
+        with open(path, "w", encoding="utf-8") as fp:
+            json.dump(self.data, fp, ensure_ascii=False, sort_keys=True)
 
-    # redundant, here we would normally populate the rest of the data
-    experiment.exp_name = data[KEY_EXP_NAME]
-    experiment.data = data
-    return experiment
-  
+    @staticmethod
+    def load(experiment_name):
+        experiment = ExperimentData(experiment_name)
 
-  ###############################
-  # functions to save bits of data into the blob
+        path = ExperimentData.get_file_path(experiment_name)
+        with open(path, "r", encoding="utf-8") as fp:
+            data = json.load(fp)
 
-  # The goal here is to not have to manually track the dictionary keys outside of this file
+        # redundant, here we would normally populate the rest of the data
+        experiment.exp_name = data[KEY_EXP_NAME]
+        experiment.data = data
+        return experiment
 
-  def log_meta_data(self, key, value):
-    self.data[KEY_META_DATA][key] = value
+    ###############################
+    # functions to save bits of data into the blob
 
-  def log_agent_episode_rewards(self, agent, episode_number, rewards_list):
-    agent_ID = agent.get_agent_ID()
+    # The goal here is to not have to manually track the dictionary keys outside of this file
 
-    # ensure we have a dictionary for all the agent data
-    if not agent_ID in self.data[KEY_AGENT]:
-      self.data[KEY_AGENT][agent_ID] = {}
+    def log_meta_data(self, key, value):
+        self.data[KEY_META_DATA][key] = value
 
-    # ensure we have a key for episode data in the agent dictionary
-    if not KEY_AGENT_EPISODE in self.data[KEY_AGENT][agent_ID]:
-      self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE] = []
+    def log_agent_episode_rewards(
+        self, agent: BaseAgent, episode_number: int, rewards_list: List[float]
+    ):
+        agent_ID = agent.get_agent_name()
 
-    # ensure that we have an entry for this episode  
-    episode_count = len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
-    if episode_count < episode_number:
-      print("[WARNING] Logged episode number {episode_number} doesn't correspond to saved episode count {episode_count}. Did you skip an episode?")
+        # ensure we have a dictionary for all the agent data
+        if not agent_ID in self.data[KEY_AGENT]:
+            self.data[KEY_AGENT][agent_ID] = {}
 
-    # ensure that we have a dictionary for episode data 
-    if episode_count == episode_number:
-      self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE].append({})
+        # ensure we have a key for episode data in the agent dictionary
+        if not KEY_AGENT_EPISODE in self.data[KEY_AGENT][agent_ID]:
+            self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE] = []
 
-    self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][KEY_AGENT_EPISODE_REWARDS] = rewards_list
+        # ensure that we have an entry for this episode
+        episode_count = len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
+        if episode_count < episode_number:
+            print(
+                "[WARNING] Logged episode number {episode_number} doesn't correspond to saved episode count {episode_count}. Did you skip an episode?"
+            )
 
-  ###############################
-  # functions to get out the data more easily (for plots, visuals)
+        # ensure that we have a dictionary for episode data
+        if episode_count == episode_number:
+            self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE].append({})
 
-  def get_agents(self):
-    return self.data[KEY_AGENT].keys()
-  
-  def get_agent_epsiode_count(self, agent_ID):
-    return len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
-  
-  def get_agent_episode_rewards(self, agent_ID, episode_number):
-    return self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][KEY_AGENT_EPISODE_REWARDS]
+        self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][
+            KEY_AGENT_EPISODE_REWARDS
+        ] = rewards_list
+
+    ###############################
+    # functions to get out the data more easily (for plots, visuals)
+
+    def get_agents(self):
+        return self.data[KEY_AGENT].keys()
+
+    def get_agent_epsiode_count(self, agent_ID):
+        return len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
+
+    def get_agent_episode_rewards(self, agent_ID, episode_number):
+        return self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][
+            KEY_AGENT_EPISODE_REWARDS
+        ]

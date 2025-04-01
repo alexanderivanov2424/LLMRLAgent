@@ -1,6 +1,3 @@
-
-
-
 import gymnasium as gym
 import minigrid
 from gymnasium import envs
@@ -11,36 +8,41 @@ from agents.random_agent import RandomAgent
 from utils.experiment import ExperimentData
 
 # show all available envs
-#print(envs.registry.keys())
+# print(envs.registry.keys())
 
 
-def run_episode(experiment : ExperimentData, env, agent : BaseAgent, episode_number, max_step=1000):
-   
-   rewards = []
+def run_episode(
+    experiment: ExperimentData,
+    env: gym.Env,
+    agent: BaseAgent,
+    episode_number,
+    max_step=1000,
+):
 
-   observation, info = env.reset()
-   for step in range(max_step):
-      action = agent.policy(observation)
-      observation, reward, terminated, truncated, info = env.step(action)
-      agent.update(observation, action, reward, terminated, truncated)
+    rewards = []
+    observation, _ = env.reset()
+    for _ in range(max_step):
+        print(observation, observation.keys(), len(observation.get("image")))
+        action = agent.policy(observation)
+        observation, reward, terminated, truncated, _ = env.step(action)
+        agent.update(observation, action, reward, terminated, truncated)
 
-      rewards.append(reward)
+        rewards.append(reward)
 
-      if terminated or truncated:
-          break
-    
-      experiment.log_agent_episode_rewards(agent, episode_number, rewards)
+        if terminated or truncated:
+            break
+
+        experiment.log_agent_episode_rewards(agent, episode_number, rewards)
 
 
 experiment = ExperimentData("test_random_agent")
-
-env = gym.make("MiniGrid-Empty-5x5-v0")#, render_mode="human")
+env = gym.make("MiniGrid-Empty-5x5-v0")  # render_mode="human" for visualization
 agent = RandomAgent(env.action_space, env.observation_space)
 
 env.reset(seed=0)
 
 for episode in range(50):
-   run_episode(experiment, env, agent, episode)
+    run_episode(experiment, env, agent, episode)
 
 env.close()
 
