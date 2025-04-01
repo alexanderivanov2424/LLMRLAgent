@@ -1,6 +1,8 @@
-from typing import List
 from pydantic import BaseModel, Field
+from typing import List
 from ollama import chat
+
+from agents.base_agent import BaseAgent
 
 
 class Action(BaseModel):
@@ -19,14 +21,13 @@ class ActionResponse(BaseModel):
     action: str = Field(description="The chosen action from the available actions")
     reasoning: str = Field(description="The reasoning behind choosing this action")
 
-# TODO This isn't a general RL agent, call it LLMRL agent
-# TODO reparent to BaseAgent and implement base functions
 
-# TODO move prompts out into a config file so we can do precise versioning. 
+# TODO move prompts out into a config file so we can do precise versioning.
 # Doesn't matter if it is still string constants in code it just shouldn't be part of the LLMRL agent itself
 # we want to be able to create multiple of these agents with different sets of prompts and save all the different prompts we have tried
 
-class RLAgent:
+
+class LLMAgent(BaseAgent):
     def __init__(
         self,
         model: str,
@@ -45,6 +46,17 @@ class RLAgent:
         self.context_history = []
         self.base_prompt = base_prompt
         self.model = model
+
+    def get_agent_name(self):
+        return "LLMAgent"
+
+    def policy(self, observation):
+        # TODO: I don't know how to implement this
+        return super().policy(observation)
+
+    def update(self, observation, action, reward, terminated, truncated):
+        # TODO: I don't know how to implement this
+        return super().update(observation, action, reward, terminated, truncated)
 
     def _format_prompt(self, situation_description: str) -> str:
         # Setup the prompt template
@@ -87,7 +99,7 @@ class RLAgent:
 
         return ActionResponse.model_validate_json(response.message.content)
 
-    def choose_action(self, situation_description: str) -> ActionResponse:
+    def _choose_action(self, situation_description: str) -> ActionResponse:
         """
         Choose an action based on the current situation.
 
@@ -105,7 +117,7 @@ class RLAgent:
 
         return response
 
-    def update_context(self, new_context: str):
+    def _update_context(self, new_context: str):
         """
         Update the context history with new information.
 

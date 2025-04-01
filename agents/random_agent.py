@@ -4,16 +4,16 @@ from gymnasium import Space
 
 class RandomAgent(BaseAgent):
 
-  def __init__(self, action_space : Space, observation_space : Space):
-    self.action_space = action_space
-    self.observation_space = observation_space
+    def __init__(self, action_space: Space, observation_space: Space):
+        self.action_space = action_space
+        self.observation_space = observation_space
 
-  def get_agent_name(self):
-    return "RandomAgent"
+    def get_agent_name(self):
+        return "RandomAgent"
 
-  def policy(self, observation):
-    action = self.action_space.sample()
-    return action
+    def policy(self, observation):
+        action = self.action_space.sample()
+        return action
 
-  def update(self, observation, action, reward, terminated, truncated):
-    pass
+    def update(self, observation, action, reward, terminated, truncated):
+        pass
