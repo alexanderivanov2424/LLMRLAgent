@@ -4,11 +4,9 @@ from gymnasium import envs
 
 from agents.base_agent import BaseAgent
 from agents.random_agent import RandomAgent
+from agents.llm_agent import LLMAgent
 
 from utils.experiment import ExperimentData
-
-# show all available envs
-# print(envs.registry.keys())
 
 
 def run_episode(
@@ -22,7 +20,6 @@ def run_episode(
     rewards = []
     observation, _ = env.reset()
     for _ in range(max_step):
-        print(observation, observation.keys(), len(observation.get("image")))
         action = agent.policy(observation)
         observation, reward, terminated, truncated, _ = env.step(action)
         agent.update(observation, action, reward, terminated, truncated)
@@ -37,7 +34,34 @@ def run_episode(
 
 experiment = ExperimentData("test_random_agent")
 env = gym.make("MiniGrid-Empty-5x5-v0")  # render_mode="human" for visualization
-agent = RandomAgent(env.action_space, env.observation_space)
+# agent = RandomAgent(env.action_space, env.observation_space)
+agent = LLMAgent(
+    env.action_space,
+    env.observation_space,
+    model="llama3.1:8b",
+    #  dict_keys(['image', 'direction', 'mission'])
+    format_prompt_fn=lambda observation, action_space: """
+    You are an AI agent trying to navigate a puzzle maze. Your goal is to {mission}.
+    
+    The maze is represented as a 7x7 grid where:
+    - You are represented by the number 8 (agent)
+    - Empty spaces are represented by 1
+    - Walls are represented by 2
+    - The goal is represented by a different number
+    
+    Current direction: {direction} (0=right, 1=down, 2=left, 3=up)
+    
+    Available actions:
+    {actions}
+    
+    Please choose the best action to reach the goal efficiently.
+    """.format(
+        mission=observation.get("mission"),
+        direction=observation.get("direction"),
+        actions=action_space,
+    ),
+)
+
 
 env.reset(seed=0)
 

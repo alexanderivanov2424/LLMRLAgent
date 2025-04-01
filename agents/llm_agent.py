@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Callable, Any
 from ollama import chat
 from gymnasium import Space
 from agents.base_agent import BaseAgent
@@ -28,7 +28,7 @@ class LLMAgent(BaseAgent):
         action_space: Space,
         observation_space: Space,
         model: str,
-        base_prompt: str,
+        format_prompt_fn: Callable[[Any, Space], str],
     ):
         """
         Initialize the RL agent.
@@ -41,37 +41,20 @@ class LLMAgent(BaseAgent):
         super().__init__(action_space, observation_space)
 
         self.context_history = []
-        self.base_prompt = base_prompt
+        self.format_prompt_fn = format_prompt_fn
         self.model = model
 
     def get_agent_name(self):
         return "LLMAgent"
 
     def policy(self, observation):
-        return super().policy(observation)
+        prompt = self.format_prompt_fn(observation, self.action_space)
+        action = self._choose_action(prompt)
+        return action
 
     def update(self, observation, action, reward, terminated, truncated):
         # TODO: I don't know how to implement this
         return super().update(observation, action, reward, terminated, truncated)
-
-    def _format_prompt(self, situation_description: str) -> str:
-        # Setup the prompt template
-        return """
-        {base_prompt}
-
-        Available actions: {actions}
-
-        Context history:
-        {context}
-
-        Current situation: {situation}
-
-        Choose an action and provide reasoning:""".format(
-            base_prompt=self.base_prompt,
-            actions="\n".join(str(action) for action in self.action_space),
-            context="\n".join(self.context_history),
-            situation=situation_description,
-        )
 
     def _call_agent(self, prompt: str) -> ActionResponse:
         """Call the agent with the given prompt"""
@@ -95,18 +78,18 @@ class LLMAgent(BaseAgent):
 
         return ActionResponse.model_validate_json(response.message.content)
 
-    def _choose_action(self, situation_description: str) -> ActionResponse:
+    def _choose_action(self, prompt: str) -> ActionResponse:
         """
         Choose an action based on the current situation.
 
         Args:
-            situation_description: Description of the current state/situation
+            prompt: The prompt to send to the agent
 
         Returns:
             ActionChoice object containing the chosen action and reasoning
         """
         # Get model response
-        response = self._call_agent(self._format_prompt(situation_description))
+        response = self._call_agent(prompt)
 
         if response is None or not isinstance(response, ActionResponse):
             raise ValueError("Model returned invalid response")
