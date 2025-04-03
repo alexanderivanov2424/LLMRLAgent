@@ -22,7 +22,10 @@ def get_available_environments():
     """
     return list(AVAILABLE_ENVIRONMENTS.keys())
 
-def create_environment(env_name="MiniGrid-Empty-5x5-v0", seed=0):
+def print_all_envs_in_registry():
+    print(gym.envs.registry.all())
+
+def create_environment(env_name, seed=0):
     """
     Creates and returns a Gymnasium environment.
     
