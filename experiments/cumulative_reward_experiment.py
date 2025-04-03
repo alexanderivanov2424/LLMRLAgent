@@ -6,7 +6,7 @@ from gymnasium import envs
 import sys
 import os
 
-if sys.version_info < (3, 11):
+if sys.version_info < (3, 12):
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
@@ -28,8 +28,7 @@ random_agent = RandomAgent(env.action_space, env.observation_space)
 llmagent = LLMAgent(
     env.action_space,
     env.observation_space,
-    model="llama3.3",
-    #  dict_keys(['image', 'direction', 'mission'])
+    model="llama3.2",
     format_prompt_fn=lambda observation, action_space: """
     You are an AI agent trying to navigate a puzzle maze. Your goal is to {mission}.
     
@@ -42,13 +41,18 @@ llmagent = LLMAgent(
     Current direction: {direction} (0=right, 1=down, 2=left, 3=up)
     
     Available actions:
-    {actions}
+    0 = turn left
+    1 = turn right
+    2 = move forward
+    3 = pickup
+    4 = drop
+    5 = toggle
+    6 = done
     
     Please choose the best action to reach the goal efficiently.
     """.format(
         mission=observation.get("mission"),
         direction=observation.get("direction"),
-        actions=action_space,
     ),
 )
 
