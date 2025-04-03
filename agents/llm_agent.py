@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Field, create_model
-from typing import List, Callable, Any, Literal
-from typing_extensions import Annotated
+from pydantic import BaseModel, Field
+from typing import List, Callable, Any
 from ollama import chat
 from gymnasium import Space
 from agents.base_agent import BaseAgent
@@ -14,6 +13,13 @@ class Action(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.action_name}: {self.action_description}"
+
+
+class ActionResponse(BaseModel):
+    """Structure for the model's action choice and reasoning"""
+
+    action: str = Field(description="The chosen action from the available actions")
+    reasoning: str = Field(description="The reasoning behind choosing this action")
 
 
 class LLMAgent(BaseAgent):
@@ -38,19 +44,6 @@ class LLMAgent(BaseAgent):
         self.format_prompt_fn = format_prompt_fn
         self.model = model
 
-        # Create dynamic ActionResponse model
-        allowed_actions = [str(action) for action in self.action_space]
-        ActionLiteral = Literal[tuple(allowed_actions)]  # type: ignore
-
-        self.ActionResponse = create_model(
-            "ActionResponse",
-            action=(Annotated[ActionLiteral, Field(description="The chosen action from the available actions")]),  # type: ignore
-            reasoning=(
-                str,
-                Field(description="The reasoning behind choosing this action"),
-            ),
-        )
-
     def get_agent_name(self):
         return "LLMAgent"
 
@@ -63,7 +56,7 @@ class LLMAgent(BaseAgent):
         # TODO: I don't know how to implement this
         return super().update(observation, action, reward, terminated, truncated)
 
-    def _call_agent(self, prompt: str) -> Any:
+    def _call_agent(self, prompt: str) -> ActionResponse:
         """Call the agent with the given prompt"""
         response = chat(
             messages=[
@@ -73,7 +66,7 @@ class LLMAgent(BaseAgent):
                 }
             ],
             model=self.model,
-            format=self.ActionResponse.model_json_schema(),
+            format=ActionResponse.model_json_schema(),
         )
 
         if (
@@ -83,9 +76,9 @@ class LLMAgent(BaseAgent):
         ):
             raise ValueError("Model returned invalid response")
 
-        return self.ActionResponse.model_validate_json(response.message.content)
+        return ActionResponse.model_validate_json(response.message.content)
 
-    def _choose_action(self, prompt: str) -> Any:
+    def _choose_action(self, prompt: str) -> ActionResponse:
         """
         Choose an action based on the current situation.
 
@@ -98,7 +91,7 @@ class LLMAgent(BaseAgent):
         # Get model response
         response = self._call_agent(prompt)
 
-        if response is None or not isinstance(response, self.ActionResponse):
+        if response is None or not isinstance(response, ActionResponse):
             raise ValueError("Model returned invalid response")
 
         return response
