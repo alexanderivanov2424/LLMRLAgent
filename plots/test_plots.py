@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from utils.experiment import ExperimentData
+from utils.experiment_data import ExperimentData
 
 
 PLOT_SAVE_DIR = os.path.join("./plots","figures_generated")

@@ -6,43 +6,18 @@ from agents.base_agent import BaseAgent
 from agents.random_agent import RandomAgent
 from agents.llm_agent import LLMAgent
 
-from utils.experiment import ExperimentData
+from utils.run_utils import run_episode
+from utils.experiment_data import ExperimentData
 from environment.environment import create_environment, get_available_environments
-
-# Show all available envs (can add more in environment/environment.py)
-#print(get_available_environments())
-
-
-def run_episode(
-    experiment: ExperimentData,
-    env: gym.Env,
-    agent: BaseAgent,
-    episode_number,
-    max_step=1000,
-):
-
-    rewards = []
-    observation, _ = env.reset()
-    for _ in range(max_step):
-        action = agent.policy(observation)
-        observation, reward, terminated, truncated, _ = env.step(action)
-        agent.update(observation, action, reward, terminated, truncated)
-
-        rewards.append(reward)
-
-        if terminated or truncated:
-            break
-
-        experiment.log_agent_episode_rewards(agent, episode_number, rewards)
-
 
 
 # Choose test environment here based on dictionary keys in environment/environment.py
 env_name = "minigrid_empty"
-experiment = ExperimentData(f"test_random_agent_{env_name}")
+experiment = ExperimentData(f"test_agent_{env_name}")
 env = create_environment(env_name=env_name)  
-# agent = RandomAgent(env.action_space, env.observation_space)
-agent = LLMAgent(
+
+random_agent = RandomAgent(env.action_space, env.observation_space)
+llmagent = LLMAgent(
     env.action_space,
     env.observation_space,
     model="llama3.1:8b",
@@ -69,11 +44,13 @@ agent = LLMAgent(
     ),
 )
 
+agents = [random_agent, llmagent]
 
 env.reset(seed=0)
 
-for episode in range(50):
-    run_episode(experiment, env, agent, episode)
+for agent in agents:
+  for episode in range(50):
+      run_episode(experiment, env, llmagent, episode)
 
 env.close()
 
