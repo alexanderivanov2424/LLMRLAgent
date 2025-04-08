@@ -40,3 +40,9 @@ To add new dependencies:
 ```bash
 poetry add <dependency>
 ```
+
+## Install Baby AI
+
+https://github.com/Farama-Foundation/Minigrid?tab=readme-ov-file
+
+pip install minigrid

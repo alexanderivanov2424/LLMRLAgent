@@ -1,4 +1,4 @@
-import gym
+from gym_minigrid.wrappers import *
 import babyai  
 
 AVAILABLE_BABYAI_ENVIRONMENTS = {
