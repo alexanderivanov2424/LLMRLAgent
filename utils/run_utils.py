@@ -13,16 +13,19 @@ def run_episode(
 
     rewards = []
     observation, _ = env.reset()
-    for _ in range(max_step):
+
+    for step in range(max_step):
         action = agent.policy(observation)
         observation, reward, terminated, truncated, _ = env.step(action)
+
+        if step == max_step and not (terminated or truncated):
+            truncated = True
+
         agent.update(observation, action, reward, terminated, truncated)
 
         rewards.append(reward)
 
         if terminated or truncated:
-            break
-
-    
+            break   
     
     experiment.log_agent_episode_rewards(agent, episode_number, rewards)
