@@ -49,15 +49,19 @@ Please return the action number of the action you want to take. Return this as t
     """.format(
         mission=observation.get("mission"),
         state=observation.get("grid_text"),
-        action_list="\n".join([f"{key}: {action.action_name}: {action.action_description}" 
-                              for key, action in available_actions.items()])
+        action_list="\n".join(
+            [
+                f"{key}: {action.action_name}: {action.action_description}"
+                for key, action in available_actions.items()
+            ]
+        ),
     ),
 )
 
 agents = [
-    # random_agent,
-    llmagent,
-    ]
+    random_agent,
+    # llmagent,
+]
 
 
 for agent in agents:

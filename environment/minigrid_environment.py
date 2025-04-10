@@ -7,13 +7,14 @@ import minigrid.wrappers
 from environment.base_environment import BaseEnvironment, Action, ActionResponse
 from pydantic import BaseModel, Field, create_model
 
+
 class MiniGridEnvironment(BaseEnvironment):
     """
     Concrete implementation of BaseEnvironment for MiniGrid environments.
     This class wraps the Gymnasium MiniGrid environment and provides
     a standardized interface for our RL framework.
     """
-    
+
     # Action space description
     ACTION_DESCRIPTIONS = {
         0: Action(action_name="left", action_description="Turn left"),
@@ -22,7 +23,7 @@ class MiniGridEnvironment(BaseEnvironment):
         3: Action(action_name="pickup", action_description="Unused"),
         4: Action(action_name="drop", action_description="Unused"),
         5: Action(action_name="toggle", action_description="Unused"),
-        6: Action(action_name="done", action_description="Unused")
+        6: Action(action_name="done", action_description="Unused"),
     }
 
     # Type for valid action keys
@@ -30,13 +31,18 @@ class MiniGridEnvironment(BaseEnvironment):
     VALID_RESPONSE: ActionResponse = create_model(
         "ActionResponse",
         action=(Literal[0, 1, 2, 3, 4, 5, 6], Field(description="The action to take")),
-        reasoning=(str, Field(description="The reasoning for the action"))
-    ) # type: ignore
+        reasoning=(str, Field(description="The reasoning for the action")),
+    )  # type: ignore
 
-    def __init__(self, env_name: str = "MiniGrid-Empty-5x5-v0", seed: Optional[int] = None, render_mode: Optional[Literal["human", "rgb_array", "rgb_array_debug"]] = None):
+    def __init__(
+        self,
+        env_name: str = "MiniGrid-Empty-5x5-v0",
+        seed: Optional[int] = None,
+        render_mode: Optional[Literal["human", "rgb_array", "rgb_array_debug"]] = None,
+    ):
         """
         Initialize the MiniGrid environment.
-        
+
         Args:
             env_name: The name of the MiniGrid environment to create
             seed: Optional seed for reproducibility
@@ -46,30 +52,30 @@ class MiniGridEnvironment(BaseEnvironment):
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space
         self.seed = seed
-        
+
     def get_action_space(self) -> Space:
         """Returns the action space of the environment."""
         return self.action_space
-    
+
     def get_observation_space(self) -> Space:
         """Returns the observation space of the environment."""
         return self.observation_space
-    
+
     def get_action_descriptions(self) -> Dict[int, Action]:
         """
         Returns a dictionary describing all available actions.
-        
+
         Returns:
             Dict[int, Action]: Dictionary mapping action numbers to their names and descriptions
         """
         return self.ACTION_DESCRIPTIONS
-    
+
     def get_valid_response(self) -> ActionResponse:
         """
         Returns the valid response for the environment.
         """
         return self.VALID_RESPONSE
-    
+
     def grid_to_text(self, image: Any) -> str:
         """
         Convert the grid observation to a text representation.
@@ -92,11 +98,16 @@ class MiniGridEnvironment(BaseEnvironment):
         """
         height, width = image.shape[0], image.shape[1]
         text_grid = []
-        for i in range(height):
+
+        # Iterate through rows from top to bottom (reversed to match MiniGrid visualization)
+        for j in range(width):
             row = []
-            for j in range(width):
+            # Iterate through columns from left to right, but using transposed coordinates
+            for i in range(height):
                 obj_type = image[i, j, 0]
-                color = image[i, j, 1]  # 0=red, 1=green, 2=blue, 3=purple, 4=yellow, 5=grey
+                color = image[
+                    i, j, 1
+                ]  # 0=red, 1=green, 2=blue, 3=purple, 4=yellow, 5=grey
                 state = image[i, j, 2]  # 0=open, 1=closed, 2=locked
 
                 # Convert object index to character
@@ -127,12 +138,19 @@ class MiniGridEnvironment(BaseEnvironment):
                     row.append("L")
                 elif obj_type == 10:  # agent
                     # Add direction indicator for agent
-                    direction_symbols = ["▶", "▼", "◀", "▲"]  # 0=right, 1=down, 2=left, 3=up
+                    direction_symbols = [
+                        "▶",
+                        "▼",
+                        "◀",
+                        "▲",
+                    ]  # 0=right, 1=down, 2=left, 3=up
                     row.append(direction_symbols[self.last_direction])
                 else:
                     row.append("?")  # unknown
             text_grid.append(" ".join(row))
-        return "\n".join(text_grid)
+        return "\n".join(
+            text_grid
+        )  # Reverse the rows to match MiniGrid's top-to-bottom orientation
 
     def _find_first_floor(self, image: Any) -> Tuple[int, int]:
         """Find the first floor position in the grid."""
@@ -145,12 +163,12 @@ class MiniGridEnvironment(BaseEnvironment):
     def format_observation(self, observation: Dict[str, Any]) -> Dict[str, Any]:
         """
         Formats the raw observation into a structured format.
-        
+
         The MiniGrid observation is a dictionary containing:
         - image: A 7x7x3 array representing the agent's view
         - direction: The agent's current direction (0=right, 1=down, 2=left, 3=up)
         - mission: A string describing the current mission
-        
+
         Returns:
             Dict containing the formatted observation with additional context
         """
@@ -158,7 +176,7 @@ class MiniGridEnvironment(BaseEnvironment):
         image = observation["image"]
         direction = observation["direction"]
         mission = observation["mission"]
-        
+
         # Store the direction for the grid_to_text method
         self.last_direction = direction
 
@@ -169,16 +187,16 @@ class MiniGridEnvironment(BaseEnvironment):
             "mission": mission,  # Current mission
             "available_actions": self.ACTION_DESCRIPTIONS,  # Available actions and their descriptions
         }
-        
+
         return formatted_obs
-    
+
     def reset(self, seed: Optional[int] = None) -> Tuple[Any, Dict[str, Any]]:
         """
         Reset the environment to its initial state.
-        
+
         Args:
             seed: Optional seed for reproducibility
-            
+
         Returns:
             Tuple containing:
             - The initial observation
@@ -188,14 +206,16 @@ class MiniGridEnvironment(BaseEnvironment):
             self.seed = seed
         observation, info = self.env.reset(seed=self.seed)
         return self.format_observation(observation), info
-    
-    def step(self, action: int) -> Tuple[Any, SupportsFloat, bool, bool, Dict[str, Any]]:
+
+    def step(
+        self, action: int
+    ) -> Tuple[Any, SupportsFloat, bool, bool, Dict[str, Any]]:
         """
         Execute one time step within the environment.
-        
+
         Args:
             action: The action to take in the environment
-            
+
         Returns:
             Tuple containing:
             - The new observation
@@ -206,7 +226,7 @@ class MiniGridEnvironment(BaseEnvironment):
         """
         observation, reward, terminated, truncated, info = self.env.step(action)
         return self.format_observation(observation), reward, terminated, truncated, info
-    
+
     def close(self) -> None:
         """Clean up any resources used by the environment."""
-        self.env.close() 
+        self.env.close()
