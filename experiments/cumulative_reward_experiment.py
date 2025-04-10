@@ -31,20 +31,38 @@ llmagent = LLMAgent(
     env.observation_space,
     model="llama3.2",
     format_prompt_fn=lambda observation, available_actions: """
-You are an AI agent navigating a MiniGrid environment. Your goal is to {mission}.
+You are an AI agent navigating a MiniGrid environment. Your goal is to reach the green goal square marked as 'G'.
 
-The current state of the grid is:
+Current Grid Layout:
 {state}
+
+Legend:
+- █ = Wall (cannot pass through)
+- · = Empty floor (can move onto)
+- G = Goal (your target destination)
+- ▶/▼/◀/▲ = Your current position and direction
+  ▶ = facing right
+  ▼ = facing down
+  ◀ = facing left
+  ▲ = facing up
 
 Available Actions:
 {action_list}
 
-Please choose the best action to reach the goal efficiently. Consider your current position, the goal position, and your direction when making your decision.
+Navigation Strategy:
+1. First, determine if you need to turn to face the goal
+2. Once facing the right direction, move forward if the path is clear
+3. If blocked, plan a route around obstacles
 
-Please return the action number of the action you want to take. Return this as the action and then a reasoning for your choice. For example:
+Choose the most efficient action to reach the goal. Remember:
+- You can only move in the direction you're facing
+- You must turn left/right to change direction
+- Moving forward advances one square in your current direction
+
+Please return your chosen action number and detailed reasoning in this format:
 {{
-    "action": 0,
-    "reasoning": "I chose action 0 because I wanted to turn left to avoid the wall."
+    "action": <number>,
+    "reasoning": "I chose this action because... [explain how it helps reach the goal]"
 }}
     """.format(
         mission=observation.get("mission"),
