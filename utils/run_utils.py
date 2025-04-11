@@ -10,7 +10,7 @@ def run_episode(
     agent: BaseAgent,
     episode_number,
     max_step=1000,
-    seed=None,
+    seed=0,
 ):
     """
     Run a single episode of the environment with the given agent.
