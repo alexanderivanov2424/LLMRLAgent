@@ -9,7 +9,7 @@ from tqdm import tqdm
 from agents.base_agent import BaseAgent
 
 ###
-# Citation for Original Implementation: Based on the implementation provided
+# Citation for Original Implementation: https://github.com/Shu-x/TD-Lambda-in-Continuous-GridWorld/blob/main/TD(λ)%20in%20Continuous%20GridWorld.ipynb
 ###
 
 class Net(nn.Module):
