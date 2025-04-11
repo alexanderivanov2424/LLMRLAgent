@@ -1,178 +1,297 @@
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from collections import deque
-from typing import Tuple, Dict, List
+import numpy as np
+from torch.distributions import MultivariateNormal
+from torch.distributions import Categorical
 from agents.base_agent import BaseAgent
-from gymnasium import Space
 
-class PPONetwork(nn.Module):
-    def __init__(self, input_dim: int, action_dim: int, hidden_dim: int = 64):
-        super().__init__()
-        self.shared = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.Tanh(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.Tanh()
-        )
-        
-        self.policy_head = nn.Sequential(
-            nn.Linear(hidden_dim, action_dim),
-            nn.Softmax(dim=-1)
-        )
-        
-        self.value_head = nn.Sequential(
-            nn.Linear(hidden_dim, 1)
-        )
+###
+# Citation for Original Implementation: https://github.com/nikhilbarhate99/PPO-PyTorch/blob/master/PPO.py
+###
+
+################################## set device ##################################
+print("============================================================================================")
+# set device to cpu or cuda
+device = torch.device('cpu')
+if(torch.cuda.is_available()): 
+    device = torch.device('cuda:0') 
+    torch.cuda.empty_cache()
+    print("Device set to : " + str(torch.cuda.get_device_name(device)))
+else:
+    print("Device set to : cpu")
+print("============================================================================================")
+
+################################## PPO Policy ##################################
+class RolloutBuffer:
+    def __init__(self):
+        self.actions = []
+        self.states = []
+        self.logprobs = []
+        self.rewards = []
+        self.state_values = []
+        self.is_terminals = []
     
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        shared_features = self.shared(x)
-        action_probs = self.policy_head(shared_features)
-        value = self.value_head(shared_features)
-        return action_probs, value
+    def clear(self):
+        del self.actions[:]
+        del self.states[:]
+        del self.logprobs[:]
+        del self.rewards[:]
+        del self.state_values[:]
+        del self.is_terminals[:]
+
+
+class ActorCritic(nn.Module):
+    def __init__(self, state_dim, action_dim, has_continuous_action_space, action_std_init):
+        super(ActorCritic, self).__init__()
+
+        self.has_continuous_action_space = has_continuous_action_space
+        
+        if has_continuous_action_space:
+            self.action_dim = action_dim
+            self.action_var = torch.full((action_dim,), action_std_init * action_std_init).to(device)
+        # actor
+        if has_continuous_action_space :
+            self.actor = nn.Sequential(
+                            nn.Linear(state_dim, 64),
+                            nn.Tanh(),
+                            nn.Linear(64, 64),
+                            nn.Tanh(),
+                            nn.Linear(64, action_dim),
+                            nn.Tanh()
+                        )
+        else:
+            self.actor = nn.Sequential(
+                            nn.Linear(state_dim, 64),
+                            nn.Tanh(),
+                            nn.Linear(64, 64),
+                            nn.Tanh(),
+                            nn.Linear(64, action_dim),
+                            nn.Softmax(dim=-1)
+                        )
+        # critic
+        self.critic = nn.Sequential(
+                        nn.Linear(state_dim, 64),
+                        nn.Tanh(),
+                        nn.Linear(64, 64),
+                        nn.Tanh(),
+                        nn.Linear(64, 1)
+                    )
+        
+    def set_action_std(self, new_action_std):
+        if self.has_continuous_action_space:
+            self.action_var = torch.full((self.action_dim,), new_action_std * new_action_std).to(device)
+        else:
+            print("--------------------------------------------------------------------------------------------")
+            print("WARNING : Calling ActorCritic::set_action_std() on discrete action space policy")
+            print("--------------------------------------------------------------------------------------------")
+
+    def forward(self):
+        raise NotImplementedError
+    
+    def act(self, state):
+        if self.has_continuous_action_space:
+            action_mean = self.actor(state)
+            cov_mat = torch.diag(self.action_var).unsqueeze(dim=0)
+            dist = MultivariateNormal(action_mean, cov_mat)
+        else:
+            action_probs = self.actor(state)
+            dist = Categorical(action_probs)
+
+        action = dist.sample()
+        action_logprob = dist.log_prob(action)
+        state_val = self.critic(state)
+
+        return action.detach(), action_logprob.detach(), state_val.detach()
+    
+    def evaluate(self, state, action):
+        if self.has_continuous_action_space:
+            action_mean = self.actor(state)
+            
+            action_var = self.action_var.expand_as(action_mean)
+            cov_mat = torch.diag_embed(action_var).to(device)
+            dist = MultivariateNormal(action_mean, cov_mat)
+            
+            # For Single Action Environments.
+            if self.action_dim == 1:
+                action = action.reshape(-1, self.action_dim)
+        else:
+            action_probs = self.actor(state)
+            dist = Categorical(action_probs)
+        action_logprobs = dist.log_prob(action)
+        dist_entropy = dist.entropy()
+        state_values = self.critic(state)
+        
+        return action_logprobs, state_values, dist_entropy
+
 
 class PPOAgent(BaseAgent):
-    def __init__(
-        self,
-        action_space: Space,
-        observation_space: Space,
-        learning_rate: float = 3e-4,
-        gamma: float = 0.99,
-        gae_lambda: float = 0.95,
-        clip_epsilon: float = 0.2,
-        c1: float = 1.0,  # Value loss coefficient
-        c2: float = 0.01,  # Entropy coefficient
-        batch_size: int = 64,
-        n_epochs: int = 10,
-        device: str = "cuda" if torch.cuda.is_available() else "cpu"
-    ):
+    def __init__(self, action_space, observation_space, 
+                 lr_actor=0.0003, lr_critic=0.001, gamma=0.99, 
+                 K_epochs=4, eps_clip=0.2, action_std_init=0.6):
         super().__init__(action_space, observation_space)
+
+        # Determine if action space is continuous or discrete
+        self.has_continuous_action_space = not hasattr(action_space, 'n')
         
-        self.device = device
-        self.learning_rate = learning_rate
+        # Get state and action dimensions
+        if self.has_continuous_action_space:
+            action_dim = action_space.shape[0]
+        else:
+            action_dim = action_space.n
+            
+        state_dim = np.prod(observation_space.shape)
+
+        if self.has_continuous_action_space:
+            self.action_std = action_std_init
+
         self.gamma = gamma
-        self.gae_lambda = gae_lambda
-        self.clip_epsilon = clip_epsilon
-        self.c1 = c1
-        self.c2 = c2
-        self.batch_size = batch_size
-        self.n_epochs = n_epochs
+        self.eps_clip = eps_clip
+        self.K_epochs = K_epochs
         
-        # Initialize networks
-        input_dim = np.prod(observation_space.shape)
-        action_dim = action_space.n if hasattr(action_space, 'n') else np.prod(action_space.shape)
-        self.network = PPONetwork(input_dim, action_dim).to(device)
-        self.optimizer = optim.Adam(self.network.parameters(), lr=learning_rate)
+        self.buffer = RolloutBuffer()
+
+        self.policy = ActorCritic(state_dim, action_dim, self.has_continuous_action_space, action_std_init).to(device)
+        self.optimizer = torch.optim.Adam([
+                        {'params': self.policy.actor.parameters(), 'lr': lr_actor},
+                        {'params': self.policy.critic.parameters(), 'lr': lr_critic}
+                    ])
+
+        self.policy_old = ActorCritic(state_dim, action_dim, self.has_continuous_action_space, action_std_init).to(device)
+        self.policy_old.load_state_dict(self.policy.state_dict())
         
-        # Experience buffer
-        self.buffer = {
-            'observations': [],
-            'actions': [],
-            'rewards': [],
-            'values': [],
-            'log_probs': [],
-            'dones': []
-        }
-        
-    def get_agent_ID(self) -> str:
+        self.MseLoss = nn.MSELoss()
+
+    def get_agent_ID(self):
         return "PPOAgent"
-    
-    def policy(self, observation: np.ndarray) -> Tuple[int, float, float]:
-        """Returns action, log probability, and value estimate"""
-        with torch.no_grad():
-            observation = torch.FloatTensor(observation).unsqueeze(0).to(self.device)
-            action_probs, value = self.network(observation)
-            
-            action_dist = torch.distributions.Categorical(action_probs)
-            action = action_dist.sample()
-            log_prob = action_dist.log_prob(action)
-            
-            return action.item(), log_prob.item(), value.item()
-    
-    def compute_gae(self, rewards: List[float], values: List[float], dones: List[bool]) -> List[float]:
-        """Compute Generalized Advantage Estimation"""
-        advantages = []
-        gae = 0
-        
-        for t in reversed(range(len(rewards))):
-            if t == len(rewards) - 1:
-                next_value = 0
+
+    def set_action_std(self, new_action_std):
+        if self.has_continuous_action_space:
+            self.action_std = new_action_std
+            self.policy.set_action_std(new_action_std)
+            self.policy_old.set_action_std(new_action_std)
+        else:
+            print("--------------------------------------------------------------------------------------------")
+            print("WARNING : Calling PPO::set_action_std() on discrete action space policy")
+            print("--------------------------------------------------------------------------------------------")
+
+    def decay_action_std(self, action_std_decay_rate, min_action_std):
+        print("--------------------------------------------------------------------------------------------")
+        if self.has_continuous_action_space:
+            self.action_std = self.action_std - action_std_decay_rate
+            self.action_std = round(self.action_std, 4)
+            if (self.action_std <= min_action_std):
+                self.action_std = min_action_std
+                print("setting actor output action_std to min_action_std : ", self.action_std)
             else:
-                next_value = values[t + 1]
-                
-            delta = rewards[t] + self.gamma * next_value * (1 - dones[t]) - values[t]
-            gae = delta + self.gamma * self.gae_lambda * (1 - dones[t]) * gae
-            advantages.insert(0, gae)
+                print("setting actor output action_std to : ", self.action_std)
+            self.set_action_std(self.action_std)
+
+        else:
+            print("WARNING : Calling PPO::decay_action_std() on discrete action space policy")
+        print("--------------------------------------------------------------------------------------------")
+
+    def policy(self, observation):
+        """Implementation of BaseAgent's policy method"""
+        return self.select_action(observation)
+
+    def select_action(self, state):
+        """Original select_action method from the provided implementation"""
+        if self.has_continuous_action_space:
+            with torch.no_grad():
+                state = torch.FloatTensor(state).to(device)
+                action, action_logprob, state_val = self.policy_old.act(state)
+
+            self.buffer.states.append(state)
+            self.buffer.actions.append(action)
+            self.buffer.logprobs.append(action_logprob)
+            self.buffer.state_values.append(state_val)
+
+            return action.detach().cpu().numpy().flatten()
+        else:
+            with torch.no_grad():
+                state = torch.FloatTensor(state).to(device)
+                action, action_logprob, state_val = self.policy_old.act(state)
             
-        return advantages
-    
-    def update(self, observation: np.ndarray, action: int, reward: float, terminated: bool, truncated: bool):
-        """Collect experience and update policy if buffer is full"""
-        # Get current action, log prob, and value
-        _, log_prob, value = self.policy(observation)
+            self.buffer.states.append(state)
+            self.buffer.actions.append(action)
+            self.buffer.logprobs.append(action_logprob)
+            self.buffer.state_values.append(state_val)
+
+            return action.item()
+
+    def update(self, observation, action, reward, terminated, truncated):
+        """Implementation of BaseAgent's update method"""
+        # Store the reward
+        self.buffer.rewards.append(reward)
         
-        # Store experience
-        self.buffer['observations'].append(observation)
-        self.buffer['actions'].append(action)
-        self.buffer['rewards'].append(reward)
-        self.buffer['values'].append(value)
-        self.buffer['log_probs'].append(log_prob)
-        self.buffer['dones'].append(terminated or truncated)
+        # Store terminal state information
+        self.buffer.is_terminals.append(terminated or truncated)
         
-        # If episode is done, update policy
+        # If episode is terminated or truncated, update the policy
         if terminated or truncated:
             self._update_policy()
-            self.buffer = {k: [] for k in self.buffer.keys()}
-    
-    def _update_policy(self):
-        """Perform PPO update"""
-        # Convert buffer to tensors
-        observations = torch.FloatTensor(self.buffer['observations']).to(self.device)
-        actions = torch.LongTensor(self.buffer['actions']).to(self.device)
-        old_log_probs = torch.FloatTensor(self.buffer['log_probs']).to(self.device)
-        
-        # Compute advantages
-        advantages = torch.FloatTensor(
-            self.compute_gae(
-                self.buffer['rewards'],
-                self.buffer['values'],
-                self.buffer['dones']
-            )
-        ).to(self.device)
-        
-        # Normalize advantages
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-        
-        # PPO update
-        for _ in range(self.n_epochs):
-            # Generate random permutation for mini-batches
-            indices = torch.randperm(len(observations))
             
-            for start_idx in range(0, len(observations), self.batch_size):
-                idx = indices[start_idx:start_idx + self.batch_size]
-                
-                # Get current action probabilities and values
-                action_probs, values = self.network(observations[idx])
-                dist = torch.distributions.Categorical(action_probs)
-                new_log_probs = dist.log_prob(actions[idx])
-                
-                # Compute ratio and clipped surrogate loss
-                ratio = torch.exp(new_log_probs - old_log_probs[idx])
-                surr1 = ratio * advantages[idx]
-                surr2 = torch.clamp(ratio, 1 - self.clip_epsilon, 1 + self.clip_epsilon) * advantages[idx]
-                policy_loss = -torch.min(surr1, surr2).mean()
-                
-                # Compute value loss
-                value_loss = nn.MSELoss()(values.squeeze(), self.buffer['values'])
-                
-                # Compute entropy loss
-                entropy_loss = -dist.entropy().mean()
-                
-                # Total loss
-                loss = policy_loss + self.c1 * value_loss + self.c2 * entropy_loss
-                
-                # Optimize
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step() 
+    def _update_policy(self):
+        """Original update method from the provided implementation"""
+        # Skip if buffer is empty
+        if len(self.buffer.rewards) == 0:
+            return
+            
+        # Monte Carlo estimate of returns
+        rewards = []
+        discounted_reward = 0
+        for reward, is_terminal in zip(reversed(self.buffer.rewards), reversed(self.buffer.is_terminals)):
+            if is_terminal:
+                discounted_reward = 0
+            discounted_reward = reward + (self.gamma * discounted_reward)
+            rewards.insert(0, discounted_reward)
+            
+        # Normalizing the rewards
+        rewards = torch.tensor(rewards, dtype=torch.float32).to(device)
+        rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-7)
+
+        # convert list to tensor
+        old_states = torch.squeeze(torch.stack(self.buffer.states, dim=0)).detach().to(device)
+        old_actions = torch.squeeze(torch.stack(self.buffer.actions, dim=0)).detach().to(device)
+        old_logprobs = torch.squeeze(torch.stack(self.buffer.logprobs, dim=0)).detach().to(device)
+        old_state_values = torch.squeeze(torch.stack(self.buffer.state_values, dim=0)).detach().to(device)
+
+        # calculate advantages
+        advantages = rewards.detach() - old_state_values.detach()
+
+        # Optimize policy for K epochs
+        for _ in range(self.K_epochs):
+
+            # Evaluating old actions and values
+            logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
+
+            # match state_values tensor dimensions with rewards tensor
+            state_values = torch.squeeze(state_values)
+            
+            # Finding the ratio (pi_theta / pi_theta__old)
+            ratios = torch.exp(logprobs - old_logprobs.detach())
+
+            # Finding Surrogate Loss  
+            surr1 = ratios * advantages
+            surr2 = torch.clamp(ratios, 1-self.eps_clip, 1+self.eps_clip) * advantages
+
+            # final loss of clipped objective PPO
+            loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, rewards) - 0.01 * dist_entropy
+            
+            # take gradient step
+            self.optimizer.zero_grad()
+            loss.mean().backward()
+            self.optimizer.step()
+            
+        # Copy new weights into old policy
+        self.policy_old.load_state_dict(self.policy.state_dict())
+
+        # clear buffer
+        self.buffer.clear()
+    
+    def save(self, checkpoint_path):
+        torch.save(self.policy_old.state_dict(), checkpoint_path)
+   
+    def load(self, checkpoint_path):
+        self.policy_old.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
+        self.policy.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage)) 
