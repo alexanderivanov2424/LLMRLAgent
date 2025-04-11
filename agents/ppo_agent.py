@@ -75,7 +75,7 @@ class PPOAgent(BaseAgent):
             'dones': []
         }
         
-    def get_agent_name(self) -> str:
+    def get_agent_ID(self) -> str:
         return "PPOAgent"
     
     def policy(self, observation: np.ndarray) -> Tuple[int, float, float]:

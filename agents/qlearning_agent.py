@@ -48,7 +48,7 @@ class QLearningAgent(BaseAgent):
         self.optimizer = optim.Adam(self.network.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
     
-    def get_agent_name(self) -> str:
+    def get_agent_ID(self) -> str:
         return "QLearningAgent"
 
     def policy(self, observation: np.ndarray) -> int:

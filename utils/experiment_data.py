@@ -72,13 +72,10 @@ class ExperimentData:
     def log_meta_data(self, key, value):
         self.data[KEY_META_DATA][key] = value
 
-
-    # TODO there has to be a better way to safely create all the dictionary keys and throw warnings
-
     def log_agent_episode_rewards(
         self, agent: BaseAgent, episode_number: int, rewards_list: List[float]
     ):
-        agent_ID = agent.get_agent_name()
+        agent_ID = agent.get_agent_ID()
 
         # ensure we have a dictionary for all the agent data
         if not agent_ID in self.data[KEY_AGENT]:
@@ -106,7 +103,7 @@ class ExperimentData:
     def log_agent_episode_length(
         self, agent: BaseAgent, episode_number: int, length: int
     ):
-        agent_ID = agent.get_agent_name()
+        agent_ID = agent.get_agent_ID()
 
         # ensure we have a dictionary for all the agent data
         if not agent_ID in self.data[KEY_AGENT]:

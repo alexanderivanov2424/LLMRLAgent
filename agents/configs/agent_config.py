@@ -51,7 +51,7 @@ Please return your chosen action number and detailed reasoning in this format:
 }}
     """
 
-  def __init__(self)
+  def __init__(self):
     pass
   
   def generate_prompt(self, observation, available_actions):

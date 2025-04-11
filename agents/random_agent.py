@@ -8,7 +8,7 @@ class RandomAgent(BaseAgent):
         self.action_space = action_space
         self.observation_space = observation_space
 
-    def get_agent_name(self):
+    def get_agent_ID(self):
         return "RandomAgent"
 
     def policy(self, observation):
