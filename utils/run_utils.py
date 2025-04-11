@@ -39,4 +39,7 @@ def run_episode(
         if terminated or truncated:
             break
 
-    experiment.log_agent_episode_rewards(agent, episode_number, rewards)
+    sum_rewards = np.sum(rewards)
+
+    experiment.log_agent_episode_length(agent, episode_number, len(rewards))
+    experiment.log_agent_episode_reward_meta_stats(agent, episode_number, sum_rewards, sum_rewards / float(len(rewards)))

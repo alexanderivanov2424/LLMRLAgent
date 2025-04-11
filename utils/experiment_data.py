@@ -25,6 +25,8 @@ KEY_AGENT = "agents"
 KEY_AGENT_EPISODE = "episodes"
 KEY_AGENT_EPISODE_REWARDS = "rewards"
 KEY_AGENT_EPISODE_LENGTH = "ep_len"
+KEY_AGENT_EPISODE_AVG_REWARD = "avg_reward"
+KEY_AGENT_EPISODE_SUM_REWARD = "sum_reward"
 
 
 class ExperimentData:
@@ -64,6 +66,29 @@ class ExperimentData:
         experiment.data = data
         return experiment
 
+
+    def _get_agent_episode_dict(self, agent_ID: str, episode_number: int):
+        # ensure we have a dictionary for all the agent data
+        if not agent_ID in self.data[KEY_AGENT]:
+            self.data[KEY_AGENT][agent_ID] = {}
+
+        # ensure we have a key for episode data in the agent dictionary
+        if not KEY_AGENT_EPISODE in self.data[KEY_AGENT][agent_ID]:
+            self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE] = []
+
+        # ensure that we have an entry for this episode
+        episode_count = len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
+        if episode_count < episode_number:
+            print(
+                "[WARNING] Logged episode number {episode_number} doesn't correspond to saved episode count {episode_count}. Did you skip an episode?"
+            )
+
+        # ensure that we have a dictionary for episode data
+        if episode_count == episode_number:
+            self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE].append({})
+
+        return self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number]
+
     ###############################
     # functions to save bits of data into the blob
 
@@ -76,57 +101,23 @@ class ExperimentData:
         self, agent: BaseAgent, episode_number: int, rewards_list: List[float]
     ):
         agent_ID = agent.get_agent_ID()
-
-        # ensure we have a dictionary for all the agent data
-        if not agent_ID in self.data[KEY_AGENT]:
-            self.data[KEY_AGENT][agent_ID] = {}
-
-        # ensure we have a key for episode data in the agent dictionary
-        if not KEY_AGENT_EPISODE in self.data[KEY_AGENT][agent_ID]:
-            self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE] = []
-
-        # ensure that we have an entry for this episode
-        episode_count = len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
-        if episode_count < episode_number:
-            print(
-                "[WARNING] Logged episode number {episode_number} doesn't correspond to saved episode count {episode_count}. Did you skip an episode?"
-            )
-
-        # ensure that we have a dictionary for episode data
-        if episode_count == episode_number:
-            self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE].append({})
-
-        self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][
-            KEY_AGENT_EPISODE_REWARDS
-        ] = rewards_list
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        agent_episode[KEY_AGENT_EPISODE_REWARDS] = rewards_list
 
     def log_agent_episode_length(
         self, agent: BaseAgent, episode_number: int, length: int
     ):
         agent_ID = agent.get_agent_ID()
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        agent_episode[KEY_AGENT_EPISODE_LENGTH] = length
 
-        # ensure we have a dictionary for all the agent data
-        if not agent_ID in self.data[KEY_AGENT]:
-            self.data[KEY_AGENT][agent_ID] = {}
-
-        # ensure we have a key for episode data in the agent dictionary
-        if not KEY_AGENT_EPISODE in self.data[KEY_AGENT][agent_ID]:
-            self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE] = []
-
-        # ensure that we have an entry for this episode
-        episode_count = len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
-        if episode_count < episode_number:
-            print(
-                "[WARNING] Logged episode number {episode_number} doesn't correspond to saved episode count {episode_count}. Did you skip an episode?"
-            )
-
-        # ensure that we have a dictionary for episode data
-        if episode_count == episode_number:
-            self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE].append({})
-
-        self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][
-            KEY_AGENT_EPISODE_LENGTH
-        ] = length
+    def log_agent_episode_reward_meta_stats(
+        self, agent: BaseAgent, episode_number: int, reward_sum: float, reward_avg: float
+    ):
+        agent_ID = agent.get_agent_ID()
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        agent_episode[KEY_AGENT_EPISODE_SUM_REWARD] = reward_sum
+        agent_episode[KEY_AGENT_EPISODE_AVG_REWARD] = reward_avg
 
     ###############################
     # functions to get out the data more easily (for plots, visuals)
@@ -138,11 +129,17 @@ class ExperimentData:
         return len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
 
     def get_agent_episode_rewards(self, agent_ID, episode_number):
-        return self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][
-            KEY_AGENT_EPISODE_REWARDS
-        ]
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        return agent_episode[KEY_AGENT_EPISODE_REWARDS]
     
     def get_agent_episode_length(self, agent_ID, episode_number):
-        return self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE][episode_number][
-            KEY_AGENT_EPISODE_LENGTH
-        ]
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        return agent_episode[KEY_AGENT_EPISODE_LENGTH]
+    
+    def get_agent_episode_sum_reward(self, agent_ID, episode_number)
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        return agent_episode[KEY_AGENT_EPISODE_SUM_REWARD]
+
+    def get_agent_episode_average_reward(self, agent_ID, episode_number)
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        return agent_episode[KEY_AGENT_EPISODE_AVG_REWARD]

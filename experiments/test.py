@@ -27,12 +27,6 @@ env = MiniGridEnvironment(env_name=env_name)
 random_agent = RandomAgent(env.action_space, env.observation_space)
 
 
-print("hello")
-
-
-
-exit()
-
 agents = [
     random_agent,
     # llmagent,
