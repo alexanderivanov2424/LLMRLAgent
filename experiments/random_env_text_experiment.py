@@ -9,6 +9,8 @@ from agents.llm_agent import LLMAgent
 from utils.run_utils import run_episode
 from utils.experiment_data import ExperimentData
 
+
+# We can just use env_ids directly here. It is nice to have a list saved in text but a helper here is overkill
 env_id = "MiniGrid-Empty-5x5-v0"
 env = gym.make(env_id)
 
