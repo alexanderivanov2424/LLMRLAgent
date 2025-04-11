@@ -4,7 +4,7 @@ from ollama import chat
 from gymnasium import Space
 from agents.base_agent import BaseAgent
 from environment.base_environment import Action, ActionResponse
-
+from agents.configs.agent_config import LLMRLAgentConfig
 
 
 class LLMAgent(BaseAgent):
@@ -14,7 +14,7 @@ class LLMAgent(BaseAgent):
         valid_response: ActionResponse,
         observation_space: Space,
         model: str,
-        format_prompt_fn: Callable[[Dict[str, Any], Dict[int, Action]], str],
+        config : LLMRLAgentConfig
     ):
         """
         Initialize the RL agent.
@@ -27,7 +27,7 @@ class LLMAgent(BaseAgent):
         super().__init__(action_space, observation_space)
 
         self.context_history = []
-        self.format_prompt_fn = format_prompt_fn
+        self.config = config
         self.model = model
         self.valid_response = valid_response
 
@@ -48,7 +48,7 @@ class LLMAgent(BaseAgent):
         available_actions = observation.get("available_actions", {})
         
         # Format the prompt using the formatted observation and action descriptions
-        prompt = self.format_prompt_fn(observation, available_actions)
+        prompt = self.config.generate_prompt(observation, available_actions)
         
         # Get the action response from the LLM
         response = self._choose_action(prompt)
