@@ -4,3 +4,4 @@ __pycache__
 .DS_Store
 plots/
 experiment_data/
+environment/available_environments/
