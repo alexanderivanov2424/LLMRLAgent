@@ -38,7 +38,7 @@ llmagent = LLMAgent(
 
 agents = [
     random_agent,
-    # llmagent,
+    llmagent,
 ]
 
 
