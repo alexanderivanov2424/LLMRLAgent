@@ -19,7 +19,7 @@ class GridConfig(LLMRLAgentConfig):
 You are an AI agent navigating a MiniGrid environment. Your goal is to reach the green goal square marked as 'G'.
 
 Current Grid Layout:
-{state}
+{{state}}
 
 Legend:
 - █ = Wall (cannot pass through)
@@ -32,7 +32,7 @@ Legend:
   ▲ = facing up
 
 Available Actions:
-{action_list}
+{{action_list}}
 
 Navigation Strategy:
 1. First, determine if you need to turn to face the goal
