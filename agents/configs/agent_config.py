@@ -61,7 +61,7 @@ Please return your chosen action number and detailed reasoning in this format:
                 for key, action in available_actions.items()
             ]
         )
-    BaseConfig.prompt.format(
+    GridConfig.prompt.format(
         mission=observation.get("mission"),
         state=observation.get("grid_text"),
         action_list=action_list
