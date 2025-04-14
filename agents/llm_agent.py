@@ -94,7 +94,6 @@ class LLMAgent(BaseAgent):
         """
         # Get model response
         response = self._call_agent(prompt)
-        print(prompt, response)
 
         if response is None:
             raise ValueError("Model returned invalid response")
