@@ -47,8 +47,8 @@ def run_episode(
         if terminated or truncated:
             break
 
-    sum_rewards = np.sum(rewards)
-    avg_rewards = sum_rewards / float(len(rewards))
+    sum_rewards = float(np.sum(rewards))
+    avg_rewards = float(sum_rewards / float(len(rewards)))
 
     if verbose:
         print(f"average reward: {avg_rewards}         ")

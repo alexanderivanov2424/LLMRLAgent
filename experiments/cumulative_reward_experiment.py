@@ -45,11 +45,12 @@ agents = [
 for agent in agents:
 
     existing_epsiodes = experiment.get_agent_epsiode_count(agent.get_agent_ID())
-    
+
     for episode in range(50):
         if episode < existing_epsiodes:
             continue
         run_episode(experiment, env, agent, episode, seed=0, verbose=agent==llmagent)
+        
         experiment.save()
 
 env.close()
