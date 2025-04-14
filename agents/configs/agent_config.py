@@ -15,7 +15,7 @@ class LLMRLAgentConfig:
 
 class GridConfig(LLMRLAgentConfig):
 
-  prompt = """
+  full_prompt = """
 You are an AI agent navigating a MiniGrid environment. Your goal is to reach the green goal square marked as 'G'.
 
 Current Grid Layout:
@@ -45,14 +45,25 @@ Choose the most efficient action to reach the goal. Remember:
 - Moving forward advances one square in your current direction
 
 Please return your chosen action number and detailed reasoning in this format:
+{response_type}
+    """
+
+  response_full = """
 {{
     "action": <number>,
     "reasoning": "I chose this action because... [explain how it helps reach the goal]"
 }}
     """
 
-  def __init__(self):
-    pass
+  response_action_only = """
+{{
+    "action": <number>,
+    "reasoning": "I chose this action because... [explain how it helps reach the goal]"
+}}
+    """
+
+  def __init__(self, with_reasoning=False):
+    self.prompt = GridConfig.full_prompt.format(response_type = GridConfig.response_full if with_reasoning else GridConfig.response_action_only)
   
   def generate_prompt(self, observation, available_actions):
     action_list = "\n".join(
@@ -61,7 +72,7 @@ Please return your chosen action number and detailed reasoning in this format:
                 for key, action in available_actions.items()
             ]
         )
-    return GridConfig.prompt.format(
+    return self.prompt.format(
         mission=observation.get("mission"),
         state=observation.get("grid_text"),
         action_list=action_list
