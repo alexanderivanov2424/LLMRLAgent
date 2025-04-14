@@ -58,6 +58,10 @@ class ExperimentData:
         experiment = ExperimentData(experiment_name)
 
         path = ExperimentData.get_file_path(experiment_name)
+
+        if not os.path.isfile(path):
+            return experiment
+
         with open(path, "r", encoding="utf-8") as fp:
             data = json.load(fp)
 
