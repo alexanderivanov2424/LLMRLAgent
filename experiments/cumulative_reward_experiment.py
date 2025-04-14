@@ -20,7 +20,7 @@ from utils.experiment_data import ExperimentData
 
 # Choose test environment here
 env_name = "MiniGrid-Empty-5x5-v0"
-experiment = ExperimentData(f"test_agent_{env_name}")
+experiment = ExperimentData.load(f"test_agent_{env_name}")
 
 # Create the environment using our new MiniGridEnvironment class
 env = MiniGridEnvironment(env_name=env_name)
@@ -43,8 +43,15 @@ agents = [
 
 
 for agent in agents:
+
+    existing_epsiodes = experiment.get_agent_epsiode_count(agent.get_agent_ID())
+
     for episode in range(50):
-        run_episode(experiment, env, agent, episode, seed=0)
+        if episode < existing_epsiodes:
+            continue
+        run_episode(experiment, env, agent, episode, seed=0, verbose=agent==llmagent)
+        
+        experiment.save()
 
 env.close()
 

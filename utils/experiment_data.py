@@ -1,5 +1,6 @@
 import os
 import json
+from json.decoder import JSONDecodeError
 from typing import List
 from agents.base_agent import BaseAgent
 
@@ -57,13 +58,21 @@ class ExperimentData:
     def load(experiment_name):
         experiment = ExperimentData(experiment_name)
 
-        path = ExperimentData.get_file_path(experiment_name)
-        with open(path, "r", encoding="utf-8") as fp:
-            data = json.load(fp)
+        path = experiment.get_file_path()
 
-        # redundant, here we would normally populate the rest of the data
-        experiment.exp_name = data[KEY_EXP_NAME]
-        experiment.data = data
+        if not os.path.isfile(path):
+            return experiment
+
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                data = json.load(fp)
+
+            # redundant, here we would normally populate the rest of the data
+            experiment.exp_name = data[KEY_EXP_NAME]
+            experiment.data = data
+        except JSONDecodeError as e:
+            print("[Error] Failed to load experiment, check file for corruption")
+            exit()
         return experiment
 
 
@@ -126,20 +135,36 @@ class ExperimentData:
         return self.data[KEY_AGENT].keys()
 
     def get_agent_epsiode_count(self, agent_ID):
+        if not agent_ID in self.data[KEY_AGENT]:
+            return 0
+        if not KEY_AGENT_EPISODE in self.data[KEY_AGENT][agent_ID]:
+            return 0
         return len(self.data[KEY_AGENT][agent_ID][KEY_AGENT_EPISODE])
 
     def get_agent_episode_rewards(self, agent_ID, episode_number):
         agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
-        return agent_episode[KEY_AGENT_EPISODE_REWARDS]
+        if KEY_AGENT_EPISODE_REWARDS in agent_episode:
+            return agent_episode[KEY_AGENT_EPISODE_REWARDS]
+        print("[Warning] No Episode Reward Data")
+        return -1
     
     def get_agent_episode_length(self, agent_ID, episode_number):
         agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
-        return agent_episode[KEY_AGENT_EPISODE_LENGTH]
+        if KEY_AGENT_EPISODE_LENGTH in agent_episode:
+            return agent_episode[KEY_AGENT_EPISODE_LENGTH]
+        print("[Warning] No Episode Length Data")
+        return -1
     
     def get_agent_episode_sum_reward(self, agent_ID, episode_number):
         agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
-        return agent_episode[KEY_AGENT_EPISODE_SUM_REWARD]
+        if KEY_AGENT_EPISODE_SUM_REWARD in agent_episode:
+            return agent_episode[KEY_AGENT_EPISODE_SUM_REWARD]
+        print("[Warning] No Reward Sum Data")
+        return -1
 
     def get_agent_episode_average_reward(self, agent_ID, episode_number):
         agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
-        return agent_episode[KEY_AGENT_EPISODE_AVG_REWARD]
+        if KEY_AGENT_EPISODE_AVG_REWARD in agent_episode:
+            return agent_episode[KEY_AGENT_EPISODE_AVG_REWARD]
+        print("[Warning] No Reward Avg Data")
+        return -1

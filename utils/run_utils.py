@@ -12,6 +12,7 @@ def run_episode(
     episode_number,
     max_step=1000,
     seed=0,
+    verbose=True
 ):
     """
     Run a single episode of the environment with the given agent.
@@ -26,7 +27,13 @@ def run_episode(
     rewards = []
     observation, _ = env.reset(seed=seed)
 
+    if verbose:
+        print(f"Starting Episode {episode_number}")
+
     for step in range(max_step):
+        if verbose:
+            print(f"{step}/{max_step}", end="\r")
+
         action = agent.policy(observation)
         observation, reward, terminated, truncated, _ = env.step(action)
 
@@ -40,7 +47,11 @@ def run_episode(
         if terminated or truncated:
             break
 
-    sum_rewards = np.sum(rewards)
+    sum_rewards = float(np.sum(rewards))
+    avg_rewards = float(sum_rewards / float(len(rewards)))
+
+    if verbose:
+        print(f"average reward: {avg_rewards}         ")
 
     experiment.log_agent_episode_length(agent, episode_number, len(rewards))
-    experiment.log_agent_episode_reward_meta_stats(agent, episode_number, sum_rewards, sum_rewards / float(len(rewards)))
+    experiment.log_agent_episode_reward_meta_stats(agent, episode_number, sum_rewards, avg_rewards)
