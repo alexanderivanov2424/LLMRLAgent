@@ -44,7 +44,8 @@ agents = [
 
 for agent in agents:
     for episode in range(50):
-        run_episode(experiment, env, agent, episode, seed=0)
+        run_episode(experiment, env, agent, episode, seed=0, verbose=agent==llmagent)
+        experiment.save()
 
 env.close()
 
