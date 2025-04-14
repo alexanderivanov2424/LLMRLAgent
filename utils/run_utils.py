@@ -1,4 +1,5 @@
 import gymnasium as gym
+import numpy as np
 from agents.base_agent import BaseAgent
 from utils.experiment_data import ExperimentData
 from environment.base_environment import BaseEnvironment
