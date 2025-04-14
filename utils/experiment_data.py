@@ -1,5 +1,6 @@
 import os
 import json
+from json.decoder import JSONDecodeError
 from typing import List
 from agents.base_agent import BaseAgent
 
@@ -62,12 +63,16 @@ class ExperimentData:
         if not os.path.isfile(path):
             return experiment
 
-        with open(path, "r", encoding="utf-8") as fp:
-            data = json.load(fp)
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                data = json.load(fp)
 
-        # redundant, here we would normally populate the rest of the data
-        experiment.exp_name = data[KEY_EXP_NAME]
-        experiment.data = data
+            # redundant, here we would normally populate the rest of the data
+            experiment.exp_name = data[KEY_EXP_NAME]
+            experiment.data = data
+        except JSONDecodeError as e:
+            print("[Error] Failed to load experiment, check file for corruption")
+            exit()
         return experiment
 
 
