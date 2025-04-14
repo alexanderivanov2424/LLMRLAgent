@@ -57,7 +57,7 @@ class ExperimentData:
     def load(experiment_name):
         experiment = ExperimentData(experiment_name)
 
-        path = ExperimentData.get_file_path(experiment_name)
+        path = experiment.get_file_path(experiment_name)
 
         if not os.path.isfile(path):
             return experiment
