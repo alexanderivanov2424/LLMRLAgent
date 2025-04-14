@@ -36,23 +36,56 @@ class TaxiEnvironment(BaseEnvironment):
 
     def get_valid_response(self) -> BaseModel:
         return self.VALID_RESPONSE
+    
+    def grid_to_text(self, obs: int) -> str:
+        taxi_row = obs // 100
+        rem = obs % 100
+        taxi_col = rem // 20
+        rem %= 20
+        pass_idx = rem // 4
+        dest_idx = rem % 4
 
-    def format_observation(self, observation: Any) -> Dict[str, Any]:
-        taxi_row = observation // 100
-        observation %= 100
-        taxi_col = observation // 20
-        observation %= 20
-        passenger_loc = observation // 4
-        destination = observation % 4
+        locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
+        grid = [[" ." for _ in range(5)] for _ in range(5)]
+
+        if pass_idx < 4:
+            pr, pc = locs[pass_idx]
+            grid[pr][pc] = "🧍"
+        dr, dc = locs[dest_idx]
+        grid[dr][dc] = "🎯"
+
+        tr, tc = taxi_row, taxi_col
+        if pass_idx == 4:
+            grid[tr][tc] = "🧍🎯"
+        else:
+            grid[tr][tc] = "🚕"
+
+        return "\n".join("".join(row) for row in grid)
+
+
+    def format_observation(self, obs: int) -> Dict[str, Any]:
+        taxi_row = obs // 100
+        rem = obs % 100
+        taxi_col = rem // 20
+        rem %= 20
+        passenger_loc = rem // 4
+        destination = rem % 4
+
+        locs = [(0, 0), (0, 4), (4, 0), (4, 3)]
+
+        passenger_coords = "in the taxi" if passenger_loc == 4 else f"at {locs[passenger_loc]}"
+        destination_coords = locs[destination]
 
         return {
             "description": (
                 f"The taxi is at ({taxi_row}, {taxi_col}). "
-                f"The passenger is at location {passenger_loc}. "
-                f"The destination is location {destination}."
+                f"The passenger is {passenger_coords}. "
+                f"The destination is at {destination_coords}."
             ),
             "available_actions": self.ACTIONS,
+            "grid_text": self.grid_to_text(obs),
         }
+
 
     def reset(self, seed: Optional[int] = None) -> Tuple[Any, Dict[str, Any]]:
         observation, info = self.env.reset(seed=seed)
@@ -98,12 +131,26 @@ class FrozenLakeEnvironment(BaseEnvironment):
     def get_valid_response(self) -> BaseModel:
         return self.VALID_RESPONSE
 
+    def grid_to_text(self, observation: int) -> str:
+        grid = self.env.unwrapped.desc.astype(str)
+        size = grid.shape[0]
+        grid = [[c for c in row] for row in grid]
+
+        row = observation // size
+        col = observation % size
+        grid[row][col] = "A"
+
+        return "\n".join(" ".join(cell for cell in row) for row in grid)
+
     def format_observation(self, observation: Any) -> Dict[str, Any]:
         row = observation // self.grid_size
         col = observation % self.grid_size
+        
         return {
             "description": f"The agent is at position ({row}, {col}) on a {self.grid_size}x{self.grid_size} frozen lake.",
             "available_actions": self.ACTIONS,
+            "grid_text": self.grid_to_text(observation),
+
         }
 
     def reset(self, seed: Optional[int] = None) -> Tuple[Any, Dict[str, Any]]:
