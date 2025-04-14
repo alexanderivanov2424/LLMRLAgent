@@ -136,10 +136,10 @@ class ExperimentData:
         agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
         return agent_episode[KEY_AGENT_EPISODE_LENGTH]
     
-    def get_agent_episode_sum_reward(self, agent_ID, episode_number)
+    def get_agent_episode_sum_reward(self, agent_ID, episode_number):
         agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
         return agent_episode[KEY_AGENT_EPISODE_SUM_REWARD]
 
-    def get_agent_episode_average_reward(self, agent_ID, episode_number)
+    def get_agent_episode_average_reward(self, agent_ID, episode_number):
         agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
         return agent_episode[KEY_AGENT_EPISODE_AVG_REWARD]
