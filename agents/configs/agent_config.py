@@ -57,8 +57,7 @@ Please return your chosen action number and detailed reasoning in this format:
 
   response_action_only = """
 {{
-    "action": <number>,
-    "reasoning": "I chose this action because... [explain how it helps reach the goal]"
+    "action": <number>
 }}
     """
 
