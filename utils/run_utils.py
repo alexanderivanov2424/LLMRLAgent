@@ -28,11 +28,11 @@ def run_episode(
     observation, _ = env.reset(seed=seed)
 
     if verbose:
-        print("Starting Episode {episode_number}")
+        print(f"Starting Episode {episode_number}")
 
     for step in range(max_step):
         if verbose:
-            print("{step}/{max_step}", end="\r")
+            print(f"{step}/{max_step}", end="\r")
 
         action = agent.policy(observation)
         observation, reward, terminated, truncated, _ = env.step(action)
@@ -51,7 +51,7 @@ def run_episode(
     avg_rewards = sum_rewards / float(len(rewards))
 
     if verbose:
-        print("average reward: {avg_rewards}         ")
+        print(f"average reward: {avg_rewards}         ")
 
     experiment.log_agent_episode_length(agent, episode_number, len(rewards))
     experiment.log_agent_episode_reward_meta_stats(agent, episode_number, sum_rewards, avg_rewards)
