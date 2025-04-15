@@ -2,9 +2,11 @@
 
 This document outlines a detailed experiment pipeline to evaluate LLM/VLM-based policies in reinforcement learning tasks.
 
+SEE PHASE 2 FOR MAIN EXPERIMENT PLAN (all others are if we have extra time)
+
 ---
 
-## Phase 1: Prompting Strategy Experiments
+## Phase 1: Prompting Strategy Experiments (SKIPPING FOR TIME)
 
 ### Experiment 1.1: Structured vs. Unstructured Observations
 
@@ -86,7 +88,7 @@ This document outlines a detailed experiment pipeline to evaluate LLM/VLM-based 
 
 ## Phase 2: Comparative Evaluation with Traditional RL Baselines
 
-### Experiment 2.1: LLM Agent vs. Conventional RL in Discrete Navigation
+### Experiment 2.1: LLM Agent vs. Conventional RL in Discrete Domain
 
 - **Description:**  
   Benchmark the LLM agent against established RL agents (e.g., PPO, DQN) on a controlled navigation task.
@@ -96,17 +98,25 @@ This document outlines a detailed experiment pipeline to evaluate LLM/VLM-based 
   - **Evaluation:** Measure task completion rate, cumulative rewards, and assess decision interpretability via textual rationales.
 
 - **Method/Experiment Design:**  
-  - Conduct multiple trials for each agent configuration (LLM prompt strategies vs. traditional RL parameters). (TODO: SELECT LLM AGENT VARIATIONS BASED ON EXPERIMENTS)
+  - Conduct multiple trials for each agent configuration (LLM prompt strategies vs. traditional RL parameters).
   - Analyze variance in performance under identical initial conditions.
   - Optionally record internal decision logs from the LLM for post hoc qualitative review.
   
 - **Agents:**  
   - LLM Agent (text-only) with optimized prompt configurations.
-  - Baseline Agents: PPO or DQN implemented through standard RL frameworks.
+  - General DQN (1 set of hyperparameter for all environments)
+  - N specialized DQNs (Tuned hyperparameters for each env)
+    - We may just be able to pull these form existing papers
 
-- **Environments:**  
-  - BabyAI-GoToRedBall (from the BabyAI environments list)  
-    *Justification:* This task provides a natural language grounding challenge ideal for comparing policy robustness.
+- **Environments:**
+  - Gymnasium
+    - Taxi
+    - Frozen Lake
+  - Minigrid
+    - Doorkey
+    - Emptyenv
+    - Lavagapenv
+    - BabyAI/GoToImpUnlock
 
 ---
 
@@ -126,11 +136,15 @@ This document outlines a detailed experiment pipeline to evaluate LLM/VLM-based 
   
 - **Agents:**  
   - LLM Agent (text-only with engineered prompt modifications).
-  - Baseline Agents: DDPG or PPO.
+  - General PPO (1 set of hyperparameter for all environments)
+  - Specialized PPO (Tuned hyperparameters for each env)
   
 - **Environments:**  
-  - Reacher and CarRacing (from the Gymnasium environments list)  
-    *Justification:* Both offer challenges in continuous control, testing the abstraction abilities of LLM-driven policies.
+  - Implemented Wrappers:
+    - CartPole (continuous observation, discrete action)
+    - Lunar Lander (continuous observation, discrete action)
+  - Unimplemented Wrappers:
+    - Reacher (continuous observation, continuous action)
 
 ---
 
@@ -152,11 +166,10 @@ This document outlines a detailed experiment pipeline to evaluate LLM/VLM-based 
   
 - **Agents:**  
   - VLM Agent (multi-modal).
-  - Comparison: LLM Agent (text-only).
+  - DQN
   
 - **Environments:**  
-  - CarRacing (from the Gymnasium environments list) or visually enhanced MiniGrid variants.
-  - *Justification:* CarRacing inherently benefits from visual perception, providing a natural test bed for multi-modal integration.
+  - CarRacing (continuous observation, discrete action)
 
 ---
 
