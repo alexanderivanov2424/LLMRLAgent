@@ -214,3 +214,56 @@ class CartPoleEnvironment(BaseEnvironment):
 
     def close(self) -> None:
         self.env.close()
+class LunarLanderEnvironment(BaseEnvironment):
+    ACTIONS = {
+        0: Action(action_name="do nothing", action_description="Fires no engine"),
+        1: Action(action_name="fire left engine", action_description="Fires the left orientation engine"),
+        2: Action(action_name="fire main engine", action_description="Fires the central engine to go up"),
+        3: Action(action_name="fire right engine", action_description="Fires the right orientation engine"),
+    }
+
+    VALID_RESPONSE = create_model(
+        "LunarLanderActionResponse",
+        action=(Literal[0, 1, 2, 3], Field(description="The action to take")),
+        reasoning=(str, Field(description="The reasoning for the action")),
+    )
+
+    def __init__(self):
+        self.env = gym.make("LunarLander-v2")
+        self.action_space = self.env.action_space
+        self.observation_space = self.env.observation_space
+
+    def get_action_space(self) -> Space:
+        return self.action_space
+
+    def get_observation_space(self) -> Space:
+        return self.observation_space
+
+    def get_action_descriptions(self) -> Dict[int, Action]:
+        return self.ACTIONS
+
+    def get_valid_response(self) -> BaseModel:
+        return self.VALID_RESPONSE
+
+    def format_observation(self, observation: Any) -> Dict[str, Any]:
+        x, y, vel_x, vel_y, angle, ang_vel, left_contact, right_contact = observation
+        return {
+            "description": (
+                f"Position=({x:.2f}, {y:.2f}), Velocity=({vel_x:.2f}, {vel_y:.2f}), "
+                f"Angle={angle:.2f} rad, Angular Velocity={ang_vel:.2f}, "
+                f"Left Leg Contact={'yes' if left_contact else 'no'}, "
+                f"Right Leg Contact={'yes' if right_contact else 'no'}."
+            ),
+            "available_actions": self.ACTIONS,
+        }
+
+    def reset(self, seed: Optional[int] = None) -> Tuple[Any, Dict[str, Any]]:
+        observation, info = self.env.reset(seed=seed)
+        return self.format_observation(observation), info
+
+    def step(self, action: int) -> Tuple[Any, SupportsFloat, bool, bool, Dict[str, Any]]:
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        return self.format_observation(obs), reward, terminated, truncated, info
+
+    def close(self) -> None:
+        self.env.close()

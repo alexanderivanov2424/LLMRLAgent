@@ -6,6 +6,7 @@ from environment.env_wrappers import (
     TaxiEnvironment,
     FrozenLakeEnvironment,
     CartPoleEnvironment,
+    LunarLanderEnvironment,
 )
 
 def test_env(env_class, name):
@@ -43,3 +44,4 @@ if __name__ == "__main__":
     test_env(TaxiEnvironment, "Taxi")
     test_env(FrozenLakeEnvironment, "Frozen Lake")
     test_env(CartPoleEnvironment, "CartPole")
+    test_env(LunarLanderEnvironment, "Lunar Lander")
