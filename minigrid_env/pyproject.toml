@@ -1,0 +1,23 @@
+[project]
+name = "minigrid-environment"
+version = "0.1.0"
+description = "Environment for MiniGrid"
+authors = [
+    {name = "Taj Gillin"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "gymnasium (>=1.1.1,<2.0.0)",
+    "minigrid (>=2.3.0)",
+    "numpy (>=1.26.0)"
+]
+
+[tool.poetry]
+packages = [
+    { include = "minigrid_env" }
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
