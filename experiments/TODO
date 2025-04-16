@@ -1,6 +1,0 @@
-Rough Plans:
-
-- experiments directory should have stand alone scripts which generate the data for specific plots (train X agent on X environment)
-- all experiment data should be saved in JSON so that we can separately process it to generate plots.
-  - This is important so that we can run an experiment once, get the data and then if we need to fix a plot we don't need to rerun the whole thing
-- experiment data should be saved in `experiment_data`
