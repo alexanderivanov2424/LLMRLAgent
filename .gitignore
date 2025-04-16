@@ -2,9 +2,3 @@
 .env
 __pycache__
 .DS_Store
-<<<<<<< HEAD
-plots/
-experiment_data/
-environment/available_environments/
-=======
->>>>>>> ff3a29557f33ac31a3925ff0fd3b37b6d1564b21

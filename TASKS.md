@@ -92,20 +92,6 @@ Currently experiments log cumulative reward and total reward per episode.
     - [ ] CartPole
     - [ ] Lunar Lander
     - [ ] Reacher
-- [ ] General TD3
-  - [ ] Choose general DQN hyperparameters
-    - [ ] CartPole
-    - [ ] Lunar Lander
-    - [ ] Reacher
-- [ ] Specialized TD3
-  - [ ] Optimize hyper parameters per environment
-    - [ ] CartPole
-    - [ ] Lunar Lander
-    - [ ] Reacher
-  - [ ] Produce training data with optimized hyper parameters
-    - [ ] CartPole
-    - [ ] Lunar Lander
-    - [ ] Reacher
 - [ ] General PPO
   - [ ] Choose general DQN hyperparameters
     - [ ] CartPole
@@ -121,8 +107,13 @@ Currently experiments log cumulative reward and total reward per episode.
     - [ ] Lunar Lander
     - [ ] Reacher
 
-## More Domains To Consider
+## More Agents To Consider
+  More agents we can run through all the environments if we have time:
+  - [ ] TD3
 
+## More Domains To Consider
+  More domains we can test against if we can setup the corresponding wrapper for the LLM
+  - Car Racing
   - Taxi
   - Frozen Lake
 
