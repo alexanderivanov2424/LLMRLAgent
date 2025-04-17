@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from environment.minigrid_environment import MiniGridEnvironment
 
+# Running DQN on minigrid environment using standardized stable baselines 3 functions
+# TODO: cite hyperparams for baseline and SOTA models and where they came from
+# Optimized (SOTA): https://arxiv.org/abs/1811.12323
+# Standard from stable baselines 3 docs
+
 def make_env(env_id, seed=0):
     """Create a wrapped, monitored environment."""
     env = MiniGridEnvironment(env_name=env_id, seed=seed)
@@ -51,8 +56,8 @@ def train_dqn_agent(env_id, hyperparams, total_timesteps=100000, seed=0):
     
     return model
 
+# Stable baselines 3 has a built in function to evaluate the agent's performance
 def evaluate_agent(model, env_id, n_eval_episodes=10, seed=0):
-    """Evaluate the agent's performance."""
     eval_env = make_env(env_id, seed)
     mean_reward, std_reward = evaluate_policy(
         model,
@@ -62,6 +67,7 @@ def evaluate_agent(model, env_id, n_eval_episodes=10, seed=0):
     )
     return mean_reward, std_reward
 
+# edit based on what metrics are important
 def plot_results(standard_rewards, optimized_rewards, env_name):
     """Plot the training results."""
     plt.figure(figsize=(10, 6))
@@ -77,6 +83,7 @@ def plot_results(standard_rewards, optimized_rewards, env_name):
     os.makedirs('./plots', exist_ok=True)
     plt.savefig(f'./plots/dqn_comparison_{env_name}.png')
     plt.close()
+
 
 def main():
     # Environment setup
@@ -98,8 +105,9 @@ def main():
         "exploration_final_eps": 0.05
     }
     
-    # Research-optimized DQN hyperparameters from "Learning to Learn with Active Adaptive Perception"
-    # Source: https://arxiv.org/abs/1811.12323
+    # Hyperparams from "Learning to Learn with Active Adaptive Perception - 
+    # TODO: check this
+    #https://arxiv.org/abs/1811.12323
     optimized_hyperparams = {
         "learning_rate": 0.0001,        # Lower learning rate for stability
         "buffer_size": 10000,           # Smaller buffer for grid environments
@@ -115,8 +123,6 @@ def main():
         "exploration_final_eps": 0.01    # Lower final exploration rate
     }
     
-    # Create experiment data directory
-    os.makedirs('./experiment_data', exist_ok=True)
     
     # Train and evaluate standard DQN
     print("Training standard DQN...")
@@ -124,13 +130,12 @@ def main():
     standard_reward, standard_std = evaluate_agent(standard_model, env_id)
     print(f"Standard DQN - Mean reward: {standard_reward:.2f} +/- {standard_std:.2f}")
     
-    # Train and evaluate research-optimized DQN
+    # Train and evaluate SOTA DQN
     print("\nTraining research-optimized DQN...")
     optimized_model = train_dqn_agent(env_id, optimized_hyperparams)
     optimized_reward, optimized_std = evaluate_agent(optimized_model, env_id)
     print(f"Research-Optimized DQN - Mean reward: {optimized_reward:.2f} +/- {optimized_std:.2f}")
     
-    # Plot results
     plot_results(
         standard_model.eval_rewards,
         optimized_model.eval_rewards,
