@@ -10,8 +10,11 @@
   - [ ] CartPole
   - [ ] Lunar Lander
   - [ ] Reacher
+
 ## Experimental Logging
+
 Currently experiments log cumulative reward and total reward per episode.
+
 - [ ] Identify if we need anything else based on papers in related works
 - [ ] Log wall clock time average per episode (maybe per step)
 
@@ -85,13 +88,13 @@ Currently experiments log cumulative reward and total reward per episode.
 ### Continuous Domains
 
 - [ ] Random Agent
-    - [ ] CartPole
-    - [ ] Lunar Lander
-    - [ ] Reacher
+  - [ ] CartPole
+  - [ ] Lunar Lander
+  - [ ] Reacher
 - [ ] LLMRL Agent
-    - [ ] CartPole
-    - [ ] Lunar Lander
-    - [ ] Reacher
+  - [ ] CartPole
+  - [ ] Lunar Lander
+  - [ ] Reacher
 - [ ] General PPO
   - [ ] Choose general DQN hyperparameters
     - [ ] CartPole
@@ -108,18 +111,22 @@ Currently experiments log cumulative reward and total reward per episode.
     - [ ] Reacher
 
 ## More Agents To Consider
+
   More agents we can run through all the environments if we have time:
-  - [ ] TD3
+
+- [ ] TD3
 
 ## More Domains To Consider
+
   More domains we can test against if we can setup the corresponding wrapper for the LLM
-  - Car Racing
-  - Taxi
-  - Frozen Lake
+  
+- Car Racing
+- Taxi
+- Frozen Lake
 
 ## Notes
 
-  - We may want to save the random seeds used in each experiment for fair evaluation
-      - Yes, we should use the same seed everywhere for reproducability. For now envs use a seed of 0
-  - George said PPO is generally better in continuous domains, but was this referring to the observation or action space?? Should we run both DQN and PPO in both sets of experiments for robustness?
+- We may want to save the random seeds used in each experiment for fair evaluation
+  - Yes, we should use the same seed everywhere for reproducability. For now envs use a seed of 0
+- George said PPO is generally better in continuous domains, but was this referring to the observation or action space?? Should we run both DQN and PPO in both sets of experiments for robustness?
 
