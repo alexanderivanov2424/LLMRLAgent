@@ -110,6 +110,33 @@ Currently experiments log cumulative reward and total reward per episode.
     - [ ] Lunar Lander
     - [ ] Reacher
 
+
+## Multitask Discrete Experiments
+
+- [ ] Train data for LLMRL Agent across combination of discrete domains
+  - [ ] MiniGrid Doorkey
+  - [ ] MiniGrid Emptyenv
+  - [ ] MiniGrid Lavagapenv
+  - [ ] MiniGrid BabyAI GoToImpUnlock
+- [ ] Train data for DQN Agent across combination of discrete domains
+  - [ ] MiniGrid Doorkey
+  - [ ] MiniGrid Emptyenv
+  - [ ] MiniGrid Lavagapenv
+  - [ ] MiniGrid BabyAI GoToImpUnlock
+
+
+## Multitask Continuous Experiments
+
+- [ ] Train data for LLMRL Agent across domains
+  - [ ] CartPole
+  - [ ] Lunar Lander
+  - [ ] Reacher
+- [ ] Train data for PPO Agent across domains
+  - [ ] CartPole
+  - [ ] Lunar Lander
+  - [ ] Reacher
+
+
 ## More Agents To Consider
 
   More agents we can run through all the environments if we have time:
