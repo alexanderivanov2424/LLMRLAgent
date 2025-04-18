@@ -7,7 +7,7 @@ from environment.base_environment import Action, ActionResponse
 from agents.configs.agent_config import LLMRLAgentConfig
 
 
-class LLMAgent(BaseAgent):
+class LLMContextAgent(BaseAgent):
     def __init__(
         self,
         action_space: Dict[int, Action],
@@ -49,7 +49,7 @@ class LLMAgent(BaseAgent):
         
         # Format the prompt using the formatted observation and action descriptions
         
-        prompt = self.config.generate_prompt(observation, available_actions)
+        prompt = self.config.generate_prompt(observation, available_actions, self.context_history)
         
         # Get the action response from the LLM
         response = self._choose_action(prompt)
@@ -57,8 +57,28 @@ class LLMAgent(BaseAgent):
         return response.action
 
     def update(self, observation, action, reward, terminated, truncated):
-        # this agent keeps no context
-        pass
+        """
+        Implementations:
+        - Full Memory
+        
+        - Truncated Memory # TODO: Implement
+            - By recency
+            - By importance (reward)
+            
+        - LLM Summarization # TODO: Implement
+          - After n steps
+          - Reward threshold
+        """
+        # Currently implements full memory
+        # TODO: check env_wrapper for formats
+        context_update = {
+            "observation": observation,
+            "action": action,
+            "reward": reward,
+            "terminated": terminated,
+            "truncated": truncated,
+        }
+        self.context_history.append(context_update)
 
     def _call_agent(self, prompt: str) -> ActionResponse:
         """Call the agent with the given prompt"""

@@ -1,6 +1,5 @@
 
-
-class LLMRLAgentConfig:
+class LLMRLAgentConfig_Context:
 
   # whatever data this particular config needs can be passed here
   def __init__(self):
@@ -20,6 +19,8 @@ You are an AI agent navigating a MiniGrid environment. Your goal is to reach the
 
 Current Grid Layout:
 {{state}}
+
+{{context}}
 
 Legend:
 - █ = Wall (cannot pass through)
@@ -50,8 +51,9 @@ Please return your chosen action number and detailed reasoning in this format:
 
   response_full = """
 {{
+    "reasoning": "Okay, lets think about the best plan of attack... [reason your way to an action]",
     "action": <number>,
-    "reasoning": "I chose this action because... [explain how it helps reach the goal]"
+    "rationalization": "I chose this action because... [explain why this action is the best choice]",
 }}
     """
 
@@ -64,13 +66,14 @@ Please return your chosen action number and detailed reasoning in this format:
   def __init__(self, with_reasoning=False):
     self.prompt = GridConfig.full_prompt.format(response_type = GridConfig.response_full if with_reasoning else GridConfig.response_action_only)
   
-  def generate_prompt(self, observation, available_actions):
+  def generate_prompt(self, observation, available_actions, context):
     action_list = "\n".join(
             [
                 f"{key}: {action.action_name}: {action.action_description}"
                 for key, action in available_actions.items()
             ]
         )
+    context = f'Prior Context:\n{"\n".join(context)}'
     
     return self.prompt.format(
         # mission=observation.get("mission"),
