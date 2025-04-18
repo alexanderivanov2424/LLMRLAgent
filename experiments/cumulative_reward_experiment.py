@@ -11,7 +11,7 @@ if sys.version_info < (3, 12):
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agents.base_agent import BaseAgent
-from agents.configs.agent_config import GridConfig
+from agents.configs.grid_config import GridConfig_1
 from agents.llm_agent import LLMAgent
 from agents.random_agent import RandomAgent
 from environment.env_wrappers import MiniGridEnvironment
@@ -27,7 +27,7 @@ env = MiniGridEnvironment(env_name=env_name)
 
 random_agent = RandomAgent(env.action_space, env.observation_space)
 
-config = GridConfig()
+config = GridConfig_1()
 llmagent = LLMAgent(
     env.get_action_descriptions(),
     env.get_valid_response(),

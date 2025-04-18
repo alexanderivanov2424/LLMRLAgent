@@ -4,7 +4,7 @@ from ollama import chat
 from gymnasium import Space
 from agents.base_agent import BaseAgent
 from environment.base_environment import Action, ActionResponse
-from agents.configs.agent_config import LLMRLAgentConfig
+from agents.configs.base_config import LLMRLAgentConfig
 
 
 class LLMAgent(BaseAgent):

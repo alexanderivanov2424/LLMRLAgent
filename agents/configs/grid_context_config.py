@@ -1,18 +1,6 @@
+from agents.configs.base_config import LLMRLAgentConfig
 
-class LLMRLAgentConfig_Context:
-
-  # whatever data this particular config needs can be passed here
-  def __init__(self):
-    pass
-
-  
-  # whatever data this particular config needs at each time step can be passed here
-  # config should convert "text observation" and other meta data into the prompt used for the agent
-  def generate_prompt(self):
-    return ""
-
-
-class GridConfig(LLMRLAgentConfig):
+class GridContextConfig_1(LLMRLAgentConfig):
 
   full_prompt = """
 You are an AI agent navigating a MiniGrid environment. Your goal is to reach the green goal square marked as 'G'.
