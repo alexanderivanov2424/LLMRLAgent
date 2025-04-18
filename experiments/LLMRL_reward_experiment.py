@@ -40,7 +40,7 @@ llm_agent = LLMAgent(
     config=GridConfig_1(),
 )
 
-llm_context_agent = LLMAgent(
+llm_context_agent = LLMContextAgent(
     env.get_action_descriptions(),
     env.get_valid_response(),
     env.observation_space,
@@ -50,7 +50,7 @@ llm_context_agent = LLMAgent(
 
 agents = [
     random_agent,
-    llm_agent,
+    #llm_agent,
     llm_context_agent,
 ]
 
