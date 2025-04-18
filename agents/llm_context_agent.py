@@ -49,7 +49,7 @@ class LLMContextAgent(BaseAgent):
         
         # Format the prompt using the formatted observation and action descriptions
         
-        prompt = self.config.generate_prompt(observation, available_actions, self.context_history)
+        prompt = self.config.generate_prompt(observation, available_actions)
         
         # Get the action response from the LLM
         response = self._choose_action(prompt)
@@ -72,6 +72,7 @@ class LLMContextAgent(BaseAgent):
         
         if terminated or truncated:
             self.history = []
+            self.config.clear_context()
             return
 
         context_update = {
