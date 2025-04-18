@@ -50,7 +50,7 @@ llm_context_agent = LLMContextAgent(
 
 agents = [
     random_agent,
-    #llm_agent,
+    llm_agent,
     llm_context_agent,
 ]
 

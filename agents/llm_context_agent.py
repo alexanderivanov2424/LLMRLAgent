@@ -32,7 +32,7 @@ class LLMContextAgent(BaseAgent):
         self.valid_response = valid_response
 
     def get_agent_ID(self):
-        return "LLMContextAgent_" + config.__class__.__name__
+        return "LLMContextAgent_" + self.config.__class__.__name__
 
     def policy(self, observation: Dict[str, Any]) -> int:
         """
