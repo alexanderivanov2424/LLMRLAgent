@@ -54,9 +54,9 @@ Please return your chosen action number and detailed reasoning in this format:
 }}
     """
 
-  history_context_line = """observation: {}
-    action: {}
-    reward: {}
+  history_context_line = """observation: {observation}
+    action: {action}
+    reward: {reward}
 
     """
 
