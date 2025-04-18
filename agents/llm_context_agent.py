@@ -26,7 +26,7 @@ class LLMContextAgent(BaseAgent):
         """
         super().__init__(action_space, observation_space)
 
-        self.context_history = []
+        self.history = []
         self.config = config
         self.model = model
         self.valid_response = valid_response
@@ -69,8 +69,11 @@ class LLMContextAgent(BaseAgent):
           - After n steps
           - Reward threshold
         """
-        # Currently implements full memory
-        # TODO: check env_wrapper for formats
+        
+        if terminated or truncated:
+            self.history = []
+            return
+
         context_update = {
             "observation": observation,
             "action": action,
@@ -78,7 +81,9 @@ class LLMContextAgent(BaseAgent):
             "terminated": terminated,
             "truncated": truncated,
         }
-        self.context_history.append(context_update)
+        self.history.append(context_update)
+
+        self.config.update_context(observation, action, reward)
 
     def _call_agent(self, prompt: str) -> ActionResponse:
         """Call the agent with the given prompt"""

@@ -50,7 +50,7 @@ Please return your chosen action number and detailed reasoning in this format:
     """
 
   def __init__(self, with_reasoning=False):
-    self.prompt = GridConfig.full_prompt.format(response_type = GridConfig.response_full if with_reasoning else GridConfig.response_action_only)
+    self.prompt = __class__.full_prompt.format(response_type = __class__.response_full if with_reasoning else __class__.response_action_only)
   
   def generate_prompt(self, observation, available_actions):
     action_list = "\n".join(

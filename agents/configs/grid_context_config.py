@@ -8,7 +8,10 @@ You are an AI agent navigating a MiniGrid environment. Your goal is to reach the
 Current Grid Layout:
 {{state}}
 
+List of revious Grid Layouts, Actions, and Rewards:
+[
 {{context}}
+]
 
 Legend:
 - █ = Wall (cannot pass through)
@@ -51,8 +54,15 @@ Please return your chosen action number and detailed reasoning in this format:
 }}
     """
 
+  history_context_line = """observation: {}
+    action: {}
+    reward: {}
+
+    """
+
   def __init__(self, with_reasoning=False):
-    self.prompt = GridConfig.full_prompt.format(response_type = GridConfig.response_full if with_reasoning else GridConfig.response_action_only)
+    self.prompt = __class__.full_prompt.format(response_type = __class__.response_full if with_reasoning else __class__.response_action_only)
+    self.context = ""
   
   def generate_prompt(self, observation, available_actions, context):
     action_list = "\n".join(
@@ -61,11 +71,16 @@ Please return your chosen action number and detailed reasoning in this format:
                 for key, action in available_actions.items()
             ]
         )
-    context = f'Prior Context:\n{"\n".join(context)}'
     
     return self.prompt.format(
         # mission=observation.get("mission"),
         state=observation.get("grid_text"),
         action_list=action_list,
-        context=context
+        context=self.context
     )
+
+  def update_context(observation, action, reward):
+    self.context += __class__.history_context_line.format(observation=observation, action=str(action), reward=str(reward))
+
+  def clear_context():
+    self.context = ""

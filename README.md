@@ -80,6 +80,5 @@ ssh gpuxxxx
 You can now run scripts that use the LLM agent:
 
 ```bash
-python3 
+python3 -m experiments.LLMRL_reward_experiment
 ```
-
