@@ -8,7 +8,7 @@ PLOT_SAVE_DIR = os.path.join("./plots","figures_generated")
 
 # quick demo of what plot generation code could look like
 
-experiment = ExperimentData.load("test_agent_MiniGrid-Empty-5x5-v0")
+experiment = ExperimentData.load("LLMRL_agent_MiniGrid-Empty-5x5-v0")
 
 
 
