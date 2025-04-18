@@ -1,5 +1,7 @@
 import gymnasium as gym
 import numpy as np
+import time
+
 from agents.base_agent import BaseAgent
 from utils.experiment_data import ExperimentData
 from environment.base_environment import BaseEnvironment
@@ -30,17 +32,25 @@ def run_episode(
     if verbose:
         print(f"Starting Episode {episode_number}")
 
+    agent_policy_time = 0
+    agent_update_time = 0
+
     for step in range(max_step):
         if verbose:
             print(f"{step}/{max_step}", end="\r")
 
+        start_time = time.time()
         action = agent.policy(observation)
+        agent_policy_time += float(time.time() - start_time)
+
         observation, reward, terminated, truncated, _ = env.step(action)
 
         if step == max_step and not (terminated or truncated):
             truncated = True
 
+        start_time = time.time()
         agent.update(observation, action, reward, terminated, truncated)
+        agent_update_time += float(time.time() - start_time)
 
         rewards.append(reward)
 
@@ -55,3 +65,5 @@ def run_episode(
 
     experiment.log_agent_episode_length(agent, episode_number, len(rewards))
     experiment.log_agent_episode_reward_meta_stats(agent, episode_number, sum_rewards, avg_rewards)
+    experiment.log_agent_episode_policy_time(agent, episode_number, agent_policy_time)
+    experiment.log_agent_episode_update_time(agent, episode_number, agent_update_time)

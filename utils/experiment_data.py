@@ -28,6 +28,8 @@ KEY_AGENT_EPISODE_REWARDS = "rewards"
 KEY_AGENT_EPISODE_LENGTH = "ep_len"
 KEY_AGENT_EPISODE_AVG_REWARD = "avg_reward"
 KEY_AGENT_EPISODE_SUM_REWARD = "sum_reward"
+KEY_AGENT_EPISODE_TIME_POLICY = "policy_time"
+KEY_AGENT_EPISODE_TIME_UPDATE = "update_time"
 
 
 class ExperimentData:
@@ -128,6 +130,20 @@ class ExperimentData:
         agent_episode[KEY_AGENT_EPISODE_SUM_REWARD] = reward_sum
         agent_episode[KEY_AGENT_EPISODE_AVG_REWARD] = reward_avg
 
+    def log_agent_episode_policy_time(
+        self, agent: BaseAgent, episode_number: int, time: float
+    ):
+        agent_ID = agent.get_agent_ID()
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        agent_episode[KEY_AGENT_EPISODE_TIME_POLICY] = time
+    
+    def log_agent_episode_update_time(
+        self, agent: BaseAgent, episode_number: int, time: float
+    ):
+        agent_ID = agent.get_agent_ID()
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        agent_episode[KEY_AGENT_EPISODE_TIME_UPDATE] = time
+
     ###############################
     # functions to get out the data more easily (for plots, visuals)
 
@@ -167,4 +183,18 @@ class ExperimentData:
         if KEY_AGENT_EPISODE_AVG_REWARD in agent_episode:
             return agent_episode[KEY_AGENT_EPISODE_AVG_REWARD]
         print("[Warning] No Reward Avg Data")
+        return -1
+    
+    def get_agent_episode_policy_time(self, agent_ID, episode_number):
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        if KEY_AGENT_EPISODE_LENGTH in agent_episode:
+            return agent_episode[KEY_AGENT_EPISODE_TIME_POLICY]
+        print("[Warning] No Episode Policy Time Data")
+        return -1
+    
+    def get_agent_episode_update_time(self, agent_ID, episode_number):
+        agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
+        if KEY_AGENT_EPISODE_LENGTH in agent_episode:
+            return agent_episode[KEY_AGENT_EPISODE_TIME_UPDATE]
+        print("[Warning] No Episode Update Time Data")
         return -1
