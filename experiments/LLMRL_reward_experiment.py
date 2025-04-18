@@ -10,36 +10,48 @@ from gymnasium import envs
 if sys.version_info < (3, 12):
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agents.base_agent import BaseAgent
-from agents.configs.grid_config import GridConfig_1
-from agents.llm_agent import LLMAgent
-from agents.random_agent import RandomAgent
 from environment.env_wrappers import MiniGridEnvironment
+
+from agents.base_agent import BaseAgent
+from agents.random_agent import RandomAgent
+from agents.llm_agent import LLMAgent
+from agents.llm_context_agent import LLMContextAgent
+
+from agents.configs.grid_config import GridConfig_1
+from agents.configs.grid_context_config import GridContextConfig_1
+
 from utils.experiment_data import ExperimentData
 from utils.run_utils import run_episode
 
 # Choose test environment here
 env_name = "MiniGrid-Empty-5x5-v0"
-experiment = ExperimentData.load(f"test_agent_{env_name}")
+experiment = ExperimentData.load(f"LLMRL_Agent_Comp_{env_name}")
 
 # Create the environment using our new MiniGridEnvironment class
 env = MiniGridEnvironment(env_name=env_name)
 
 random_agent = RandomAgent(env.action_space, env.observation_space)
 
-config = GridConfig_1()
-llmagent = LLMAgent(
+llm_agent = LLMAgent(
     env.get_action_descriptions(),
     env.get_valid_response(),
     env.observation_space,
     model="llama3.2",
-    config=config,
+    config=GridConfig_1(),
 )
 
+llm_context_agent = LLMAgent(
+    env.get_action_descriptions(),
+    env.get_valid_response(),
+    env.observation_space,
+    model="llama3.2",
+    config=GridContextConfig_1(),
+)
 
 agents = [
     random_agent,
-    llmagent,
+    llm_agent,
+    llm_context_agent,
 ]
 
 
@@ -50,7 +62,7 @@ for agent in agents:
     for episode in range(50):
         if episode < existing_epsiodes:
             continue
-        run_episode(experiment, env, agent, episode, seed=0, verbose=agent == llmagent)
+        run_episode(experiment, env, agent, episode, max_step=100, seed=0)
 
         experiment.save()
 
