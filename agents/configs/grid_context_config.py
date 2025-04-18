@@ -80,7 +80,7 @@ Please return your chosen action number and detailed reasoning in this format:
     )
 
   def update_context(self, observation, action, reward):
-    self.context += __class__.history_context_line.format(observation=observation, action=str(action), reward=str(reward))
+    self.context += __class__.history_context_line.format(observation=observation.get("grid_text"), action=str(action), reward=str(reward))
 
   def clear_context(self):
     self.context = ""
