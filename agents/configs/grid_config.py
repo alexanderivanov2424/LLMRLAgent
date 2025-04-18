@@ -64,5 +64,4 @@ Please return your chosen action number and detailed reasoning in this format:
         # mission=observation.get("mission"),
         state=observation.get("grid_text"),
         action_list=action_list,
-        context=context
     )
