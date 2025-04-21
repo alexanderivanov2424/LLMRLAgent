@@ -10,16 +10,13 @@ from gymnasium import envs
 if sys.version_info < (3, 12):
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from environment.env_wrappers import MiniGridEnvironment
-
 from agents.base_agent import BaseAgent
-from agents.random_agent import RandomAgent
-from agents.llm_agent import LLMAgent
-from agents.llm_context_agent import LLMContextAgent
-
 from agents.configs.grid_config import GridConfig_1
 from agents.configs.grid_context_config import GridContextConfig_1
-
+from agents.llm_agent import LLMAgent
+from agents.llm_context_agent import LLMContextAgent
+from agents.random_agent import RandomAgent
+from environment.env_wrappers import MiniGridEnvironment
 from utils.experiment_data import ExperimentData
 from utils.run_utils import run_episode
 

@@ -1,9 +1,9 @@
-
 from agents.configs.base_config import LLMRLAgentConfig
+
 
 class GridConfig_1(LLMRLAgentConfig):
 
-  full_prompt = """
+    full_prompt = """
 You are an AI agent navigating a MiniGrid environment. Your goal is to reach the green goal square marked as 'G'.
 
 Current Grid Layout:
@@ -36,32 +36,36 @@ Please return your chosen action number and detailed reasoning in this format:
 {response_type}
     """
 
-  response_full = """
+    response_full = """
 {{
     "action": <number>,
     "reasoning": "I chose this action because... [explain how it helps reach the goal]"
 }}
     """
 
-  response_action_only = """
+    response_action_only = """
 {{
     "action": <number>
 }}
     """
 
-  def __init__(self, with_reasoning=False):
-    self.prompt = __class__.full_prompt.format(response_type = __class__.response_full if with_reasoning else __class__.response_action_only)
-  
-  def generate_prompt(self, observation, available_actions):
-    action_list = "\n".join(
+    def __init__(self, with_reasoning=False):
+        self.prompt = self.full_prompt.format(
+            response_type=(
+                self.response_full if with_reasoning else self.response_action_only
+            )
+        )
+
+    def generate_prompt(self, observation, available_actions):
+        action_list = "\n".join(
             [
                 f"{key}: {action.action_name}: {action.action_description}"
                 for key, action in available_actions.items()
             ]
         )
-    
-    return self.prompt.format(
-        # mission=observation.get("mission"),
-        state=observation.get("grid_text"),
-        action_list=action_list,
-    )
+
+        return self.prompt.format(
+            # mission=observation.get("mission"),
+            state=observation.get("grid_text"),
+            action_list=action_list,
+        )
