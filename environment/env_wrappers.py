@@ -6,6 +6,18 @@ from typing_extensions import Any, Dict, Literal, Optional, SupportsFloat, Tuple
 
 from environment.base_environment import Action, ActionResponse, BaseEnvironment
 
+"""
+Implementations of Environments for
+- Taxi-v3
+- FrozenLake-v1
+- CartPole-v1
+- LunarLander-v2
+- Reacher-v5
+- MiniGrid environments (e.g., MiniGrid-Empty-5x5-v0, MiniGrid-DoorKey-5x5-v0)
+
+TODO:
+- Add BabyAI environment wrapper
+"""
 
 class TaxiEnvironment(BaseEnvironment):
     ACTIONS = {
@@ -289,6 +301,68 @@ class LunarLanderEnvironment(BaseEnvironment):
     def close(self) -> None:
         self.env.close()
 
+class ReacherEnvironment(BaseEnvironment):
+    """
+    Wrapper for the Gymnasium Reacher-v5 environment.
+    """
+    # The action space is continuous: 2D torques in [-1, 1]
+    ACTIONS = {
+        "action": Action(
+            action_name="torques",
+            action_description="A tuple (a, b) representing torques applied at the two joints, each in [-1, 1]."
+        )
+    }
+
+    VALID_RESPONSE = create_model(
+        "ReacherActionResponse",
+        action=(Tuple[float, float], Field(description="Tuple of two floats in [-1, 1] for joint torques")),
+        reasoning=(str, Field(description="The reasoning for the action")),
+    )
+
+    def __init__(self):
+        self.env = gym.make("Reacher-v5")
+        self.action_space = self.env.action_space
+        self.observation_space = self.env.observation_space
+
+    def get_action_space(self) -> Space:
+        return self.action_space
+
+    def get_observation_space(self) -> Space:
+        return self.observation_space
+
+    def get_action_descriptions(self) -> Dict[str, Action]:
+        return self.ACTIONS
+
+    def get_valid_response(self) -> BaseModel:
+        return self.VALID_RESPONSE
+
+    def format_observation(self, observation: Any) -> Dict[str, Any]:
+        # Observation: [cos(q1), cos(q2), sin(q1), sin(q2), qpos_target_x, qpos_target_y, qvel_1, qvel_2, xpos_1, xpos_2]
+        obs = observation
+        desc = (
+            f"cos(joint angles): ({obs[0]:.2f}, {obs[1]:.2f}), "
+            f"sin(joint angles): ({obs[2]:.2f}, {obs[3]:.2f}), "
+            f"target position: ({obs[4]:.2f}, {obs[5]:.2f}), "
+            f"joint velocities: ({obs[6]:.2f}, {obs[7]:.2f}), "
+            f"vector fingertip-to-target: ({obs[8]:.2f}, {obs[9]:.2f})"
+        )
+        return {
+            "description": desc,
+            "available_actions": self.ACTIONS,
+        }
+
+    def reset(self, seed: Optional[int] = None) -> Tuple[Any, Dict[str, Any]]:
+        observation, info = self.env.reset(seed=seed)
+        return self.format_observation(observation), info
+
+    def step(
+        self, action: Tuple[float, float]
+    ) -> Tuple[Any, SupportsFloat, bool, bool, Dict[str, Any]]:
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        return self.format_observation(obs), reward, terminated, truncated, info
+
+    def close(self) -> None:
+        self.env.close()
 
 class MiniGridEnvironment(BaseEnvironment):
     """

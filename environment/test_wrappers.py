@@ -45,3 +45,4 @@ if __name__ == "__main__":
     test_env(FrozenLakeEnvironment, "Frozen Lake")
     test_env(CartPoleEnvironment, "CartPole")
     test_env(LunarLanderEnvironment, "Lunar Lander")
+    test_env(ReacherEnvironment, "Reacher")

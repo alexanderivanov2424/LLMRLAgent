@@ -9,16 +9,16 @@ from agents.base_agent import BaseAgent
 class DQNHyperparameters(BaseModel):
     learning_rate: float = 1e-4
     buffer_size: int = 100000
-    learning_starts: int = 1000
+    learning_starts: int = 100000
     batch_size: int = 32
-    tau: float = 1.0
+    tau: float = 1.0 
     gamma: float = 0.99
     train_freq: int = 4
     gradient_steps: int = 1
     target_update_interval: int = 1000
     exploration_fraction: float = 0.1
     exploration_initial_eps: float = 1.0
-    exploration_final_eps: float = 0.05
+    exploration_final_eps: float = 0.01
 
 
 class DQNAgent(BaseAgent):
@@ -67,7 +67,7 @@ class DQNAgent(BaseAgent):
         """Train the DQN agent."""
         # Create the model
         self.model = DQN(
-            "MlpPolicy",
+            "CnnPolicy",
             env,
             learning_rate=self.hyperparams.learning_rate,
             buffer_size=self.hyperparams.buffer_size,

@@ -61,11 +61,11 @@ class LLMContextAgent(BaseAgent):
         Implementations:
         - Full Memory
         
-        - Truncated Memory # TODO: Implement
+        - Truncated Memory
             - By recency
             - By importance (reward)
             
-        - LLM Summarization # TODO: Implement
+        - LLM Summarization
           - After n steps
           - Reward threshold
         """

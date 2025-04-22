@@ -63,6 +63,7 @@ class PPOAgent(BaseAgent):
 
     # Environment-specific optimized hyperparameters
     OPTIMIZED_HYPERPARAMS = {
+        # TODO: check for consistent environment names
         "MiniGrid-Empty-5x5-v0": PPOHyperparam(
             learning_rate=1e-4,
             n_steps=1024,
@@ -82,6 +83,36 @@ class PPOAgent(BaseAgent):
             gae_lambda=0.95,
             clip_range=0.2,
             ent_coef=0.01,
+        ),
+        "CartPole-v1": PPOHyperparam(
+            learning_rate=3e-4,
+            n_steps=2048,
+            batch_size=64,
+            n_epochs=4,
+            gamma=0.99,
+            gae_lambda=0.95,
+            clip_range=0.2,
+            ent_coef=0.0,
+        ),
+        "LunarLander-v2": PPOHyperparam(
+            learning_rate=3e-4,
+            n_steps=2048,
+            batch_size=64,
+            n_epochs=4,
+            gamma=0.99,
+            gae_lambda=0.95,
+            clip_range=0.2,
+            ent_coef=0.0,
+        ),
+        "Reacher-v2": PPOHyperparam(
+            learning_rate=3e-4,
+            n_steps=1024,
+            batch_size=64,
+            n_epochs=10,
+            gamma=0.99,
+            gae_lambda=0.95,
+            clip_range=0.2,
+            ent_coef=0.0,
         ),
         # Add more environment-specific optimized parameters as needed
     }
