@@ -84,33 +84,7 @@ class LLMContextAgent(BaseAgent):
         }
         self.history.append(context_update)
 
-        # self.config.update_context(observation, action, reward)
-
-        # Truncate by recency
-        recent_steps = self.history[-self.config.memory_length:]
-
-        # Truncate by importance
-        important_steps = [entry for entry in self.history if abs(entry["reward"]) >= self.config.importance_threshold]
-        
-        # Merge and deduplicate
-        unique_context = {id(entry): entry for entry in recent_steps + important_steps}
-        self.history = list(unique_context.values())
-
-        # LLM Summarization
-        should_summarize = (
-            len(self.history) % self.config.summarize_every_n == 0
-            or (sum(abs(entry["reward"]) for entry in self.history) / len(self.history)) > self.config.summarization_reward_threshold
-        )
-
-        if should_summarize:
-            context_str = "\n".join([
-                f"Step {i+1}: Obs={h['observation']}, Rwd={h['reward']}, Act={h['action']}" for i, h in enumerate(self.history)
-            ])
-            summary_prompt = f"Summarize the following RL agent trajectory:\n\n{context_str}"
-            summary_response = self._call_agent(summary_prompt)
-
-            self.config.clear_context()
-            self.config.update_context(summary=summary_response)
+        self.config.update_context(observation, action, reward)
 
     def _call_agent(self, prompt: str) -> ActionResponse:
         """Call the agent with the given prompt"""
