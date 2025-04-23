@@ -13,6 +13,7 @@ gymnasium = "^1.1.1"
 minigrid = "^3.0.0"
 gym = "^0.26.2"
 textworld = "^1.6.2"
+stable-baselines3 = "^2.6.0"
 
 
 [build-system]

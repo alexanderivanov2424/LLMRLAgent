@@ -1,3 +1,8 @@
+"""
+DEPRECATED!!! 
+See env_wrappers.py for the new environment wrappers.
+"""
+
 import gymnasium as gym
 
 # Sample environments we can test agents on
