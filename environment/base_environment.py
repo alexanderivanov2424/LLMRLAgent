@@ -17,6 +17,10 @@ class ActionResponse(BaseModel):
     action: int = Field(description="The action number to take")
     reasoning: str = Field(description="The reasoning behind choosing this action")
 
+class MemoryResponse(BaseModel):
+    """Base class for action responses"""
+    context: str = Field(description="New Agent Memory")
+
 class BaseEnvironment(Env):
     """
     Base class for all environments in the RL framework.
