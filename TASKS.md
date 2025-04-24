@@ -20,13 +20,13 @@ Currently experiments log cumulative reward and total reward per episode.
 
 ## LLMRL Agent Implementation
 
-- [ ] Feed trajectory history back into prompt. Agent has memory of full trajctory so far.
+- [ ] Feed trajectory history back into prompt. Agent has memory of full trajectory so far.
   - [ ] Produce data on handful of simple domains
     - [ ] MiniGrid Doorkey
     - [ ] MiniGrid Emptyenv
     - [ ] MiniGrid Lavagapenv
   - [ ] Identify alternative prompts, create new config for each
-  - [ ] Test and produce data for all alternative promps on handful of simple domains
+  - [ ] Test and produce data for all alternative prompts on handful of simple domains
     - [ ] MiniGrid Doorkey
     - [ ] MiniGrid Emptyenv
     - [ ] MiniGrid Lavagapenv

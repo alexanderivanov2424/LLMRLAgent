@@ -7,10 +7,12 @@ from stable_baselines3.common.evaluation import evaluate_policy
 
 from agents.base_agent import BaseAgent
 
-
 class PPOHyperparam(BaseModel):
     """PPO hyperparameters configuration."""
-
+    policy: str = Field(
+        default="MlpPolicy",
+        description="Policy architecture to use (e.g., 'CnnPolicy', 'MlpPolicy')"
+    )
     learning_rate: float = Field(
         default=3e-4, ge=0, description="Learning rate for the optimizer"
     )
@@ -19,13 +21,22 @@ class PPOHyperparam(BaseModel):
         gt=0,
         description="Number of steps to run for each environment per update",
     )
-    batch_size: int = Field(default=64, gt=0, description="Minibatch size")
+    batch_size: int = Field(
+        default=64, 
+        gt=0, 
+        description="Minibatch size"
+    )
     n_epochs: int = Field(
         default=10,
         gt=0,
         description="Number of epochs when optimizing the surrogate loss",
     )
-    gamma: float = Field(default=0.99, ge=0, le=1, description="Discount factor")
+    gamma: float = Field(
+        default=0.99, 
+        ge=0, 
+        le=1, 
+        description="Discount factor"
+    )
     gae_lambda: float = Field(
         default=0.95,
         ge=0,
@@ -37,6 +48,35 @@ class PPOHyperparam(BaseModel):
     )
     ent_coef: float = Field(
         default=0.0, ge=0, description="Entropy coefficient for the loss calculation"
+    )
+    clip_range_vf: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description="Clipping parameter for the value function",
+    )
+    normalize_advantage: bool = Field(
+        default=False,
+        description="Whether to normalize the advantage function",
+    )
+    vf_coef: float = Field(
+        default=0.5, 
+        ge=0, 
+        description="Value function coefficient for the loss calculation"
+    )
+    max_grad_norm: float = Field(
+        default=0.5, 
+        ge=0, 
+        description="Maximum norm for the gradient clipping"
+    )
+    seed: Optional[int] = Field(
+        default=None,
+        ge=0,
+        description="Random seed for reproducibility",
+    )
+    verbose: int = Field(
+        default=1,
+        ge=0,
+        description="Verbosity level (0 = no output, 1 = info, 2 = debug)",
     )
 
     class Config:
@@ -64,55 +104,80 @@ class PPOAgent(BaseAgent):
     # Environment-specific optimized hyperparameters
     OPTIMIZED_HYPERPARAMS = {
         # TODO: check for consistent environment names
+        # MINIGRID PPO HYPERPARAM SOURCES
+        # SOURCE 1: https://www.researchgate.net/publication/371290959_Hyperparameters_in_Reinforcement_Learning_and_How_To_Tune_Them
+        # SOURCE 2: https://github.com/DLR-RM/rl-baselines3-zoo/blob/master/hyperparams/ppo.yml
         "MiniGrid-Empty-5x5-v0": PPOHyperparam(
+            policy = "MlpPolicy",
             learning_rate=1e-4,
             n_steps=1024,
             batch_size=128,
-            n_epochs=4,
+            n_epochs=6,
             gamma=0.99,
             gae_lambda=0.95,
-            clip_range=0.2,
-            ent_coef=0.01,
+            clip_range=0.1,
+            ent_coef=0.05,
+            normalize_advantage = false,
+            max_grad_norm = 0.6,
+            vf_coef = 0.6,
+            
         ),
-        "MiniGrid-DoorKey-5x5-v0": PPOHyperparam(
+        "MiniGrid-DoorKey-5x5-v0": PPOHyperparam
+        (
+            policy = "MlpPolicy",
             learning_rate=1e-4,
-            n_steps=1024,
-            batch_size=128,
-            n_epochs=4,
+            n_steps=2048, # performed comparably to 1024 in the paper
+            batch_size=64,
+            n_epochs=8,
             gamma=0.99,
-            gae_lambda=0.95,
+            gae_lambda=0.9,
+            clip_range=0.5,
+            ent_coef=0.05,
+            normalize_advantage = True,
+            max_grad_norm = 0.6,
+            vf_coef = 0.8,
+        ),
+        # GYM PPO HYPERPARAM SOURCES
+        # https://github.com/DLR-RM/rl-baselines3-zoo/blob/master/hyperparams/ppo.yml
+        "CartPole-v1": PPOHyperparam
+        (
+            policy = "MlpPolicy",
+            learning_rate=1e-3,
+            n_steps=1024,
+            batch_size=256,
+            n_epochs=20,
+            gamma=0.98,
+            gae_lambda=0.8,
             clip_range=0.2,
+            ent_coef=0.0,
+        ),
+        "LunarLander-v2": PPOHyperparam
+        ( # May need additional tuning
+            policy = "MlpPolicy",
+            learning_rate=3e-4, # not in YML!
+            n_steps=2048,
+            batch_size=64,
+            n_epochs=4,
+            gamma=0.999,
+            gae_lambda=0.98,
             ent_coef=0.01,
+            clip_range=0.2, # not in YML!
         ),
-        "CartPole-v1": PPOHyperparam(
+        "Reacher-v2": PPOHyperparam
+        ( # TUNED for MlpPolicy
+         # SOURCE: https://github.com/DLR-RM/rl-baselines3-zoo/blob/master/hyperparams/ppo.yml
+            policy = "MlpPolicy",
             learning_rate=3e-4,
-            n_steps=2048,
-            batch_size=64,
-            n_epochs=4,
-            gamma=0.99,
-            gae_lambda=0.95,
-            clip_range=0.2,
-            ent_coef=0.0,
-        ),
-        "LunarLander-v2": PPOHyperparam(
-            learning_rate=3e-4,
-            n_steps=2048,
-            batch_size=64,
-            n_epochs=4,
-            gamma=0.99,
-            gae_lambda=0.95,
-            clip_range=0.2,
-            ent_coef=0.0,
-        ),
-        "Reacher-v2": PPOHyperparam(
-            learning_rate=3e-4,
-            n_steps=1024,
-            batch_size=64,
-            n_epochs=10,
-            gamma=0.99,
-            gae_lambda=0.95,
-            clip_range=0.2,
-            ent_coef=0.0,
+            n_steps=512,
+            batch_size=32,
+            n_epochs=5,
+            gamma=0.9,
+            gae_lambda=1.0,
+            clip_range=0.3,
+            ent_coef=7.5e-8,
+            normalize_advantage = True,
+            max_grad_norm = 0.9,
+            vf_coef = 0.95,
         ),
         # Add more environment-specific optimized parameters as needed
     }
@@ -169,8 +234,8 @@ class PPOAgent(BaseAgent):
         """Train the PPO agent."""
         # Create the model
         self.model = PPO(
-            "MlpPolicy",
-            env,
+            policy=self.hyperparams.policy,
+            env=env,
             learning_rate=self.hyperparams.learning_rate,
             n_steps=self.hyperparams.n_steps,
             batch_size=self.hyperparams.batch_size,
@@ -179,7 +244,12 @@ class PPOAgent(BaseAgent):
             gae_lambda=self.hyperparams.gae_lambda,
             clip_range=self.hyperparams.clip_range,
             ent_coef=self.hyperparams.ent_coef,
-            verbose=1,
+            clip_range_vf=self.hyperparams.clip_range_vf,
+            normalize_advantage=self.hyperparams.normalize_advantage,
+            vf_coef=self.hyperparams.vf_coef,
+            max_grad_norm=self.hyperparams.max_grad_norm,
+            seed=self.hyperparams.seed,
+            verbose=self.hyperparams.verbose,
         )
 
         # Create evaluation callback
