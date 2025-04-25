@@ -11,6 +11,11 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 
 
+# NOTE: Maybe move this to envs folder? 
+# ...originally did not plan to make a whole environment wrapper
+
+
+
 def make_env(env_id, seed=0):
     """Create a wrapped, monitored environment."""
     env = gym.make(env_id, render_mode="rgb_array")
@@ -26,9 +31,10 @@ class MultiEnvSampler(gym.Env):
         self.envs = [make_env(env_id, seed) for env_id in env_ids]
         self.current_env_idx = 0
         self.current_env = self.envs[self.current_env_idx]
+        self.need_new_env = True
         
-        # Use same spaces as the underlying environments
-        # Assuming all environments have the same observation and action spaces
+        # NOTE: this assumes all environments have the same observation and action spaces
+        # should be true for minigrid environments, but be careful with other environments
         self.observation_space = self.envs[0].observation_space
         self.action_space = self.envs[0].action_space
         
@@ -36,16 +42,23 @@ class MultiEnvSampler(gym.Env):
         """Sample a random environment."""
         self.current_env_idx = random.randint(0, len(self.envs) - 1)
         self.current_env = self.envs[self.current_env_idx]
+        self.need_new_env = False
         return self.current_env
         
     def reset(self, **kwargs):
         """Reset the environment, potentially sampling a new one."""
-        self.sample_env()
+        if self.need_new_env:
+            self.sample_env()
         return self.current_env.reset(**kwargs)
     
     def step(self, action):
         """Take a step in the current environment."""
-        return self.current_env.step(action)
+        obs, reward, done, truncated, info = self.current_env.step(action)
+        
+        if done or truncated:
+            self.need_new_env = True
+            
+        return obs, reward, done, truncated, info
     
     def render(self, **kwargs):
         """Render the current environment."""
@@ -80,10 +93,8 @@ def train_generalist_agent(env_ids, hyperparams, total_timesteps=300000, seed=0)
         verbose=1,
     )
     
-    # Create evaluation callback that evaluates on all environments
     eval_envs = [make_env(env_id, seed) for env_id in env_ids]
     
-    # We'll use the first environment for the callback, but evaluate on all later
     eval_callback = EvalCallback(
         eval_envs[0],
         best_model_save_path=f"./experiment_data/generalist_dqn/",
@@ -93,13 +104,11 @@ def train_generalist_agent(env_ids, hyperparams, total_timesteps=300000, seed=0)
         render=False,
     )
     
-    # Train the model
     model.learn(total_timesteps=total_timesteps, callback=eval_callback)
     
     return model
 
 
-# Evaluate on all environments to see generalization performance
 def evaluate_generalist_agent(model, env_ids, n_eval_episodes=10, seed=0):
     """Evaluate a generalist agent on multiple environments."""
     results = {}
@@ -123,7 +132,6 @@ def evaluate_generalist_agent(model, env_ids, n_eval_episodes=10, seed=0):
     return results
 
 
-# Stable baselines 3 has a built in function to evaluate the agent's performance
 def evaluate_agent(model, env_id, n_eval_episodes=10, seed=0):
     eval_env = make_env(env_id, seed)
     mean_reward, std_reward = evaluate_policy(
@@ -178,7 +186,10 @@ def main():
     env_ids = [
         "MiniGrid-Empty-5x5-v0",
         "MiniGrid-DoorKey-5x5-v0",
-        "MiniGrid-LavaGapS5-v0"
+        "MiniGrid-LavaGapS5-v0",
+        # "MiniGrid-Fetch-5x5-N2-v0",
+        # "MiniGrid-Dynamic-Obstacles-5x5-v0",
+        # "MiniGrid-FourRooms-v0"
     ]
 
     # Standard DQN hyperparameters (from Stable Baselines3 defaults)
