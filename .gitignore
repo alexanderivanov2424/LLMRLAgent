@@ -2,4 +2,5 @@
 .env
 __pycache__
 .DS_Store
-experiments/
+
+experiments/experiment_data/
