@@ -75,7 +75,7 @@ for agent in agents:
     for episode in range(100):
         if episode < existing_epsiodes:
             continue
-        run_episode(experiment, env, agent, episode, max_step=50, seed=0)
+        run_episode(experiment, env, agent, episode, max_step=25, seed=0)
 
         experiment.save()
 
