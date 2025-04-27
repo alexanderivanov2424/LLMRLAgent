@@ -35,10 +35,11 @@ class MultiEnvSampler(gym.Env):
         self.action_space = self.envs[0].action_space
 
     def sample_env(self):
-        self.current_env_idx = random.randint(0, len(self.envs) - 1)
+        self.current_env_idx = (self.current_env_idx + 1) % len(self.envs)
         self.current_env = self.envs[self.current_env_idx]
         self.need_new_env = False
         return self.current_env
+
 
     def reset(self, **kwargs):
         if self.need_new_env:
