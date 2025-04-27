@@ -55,15 +55,18 @@ Please return your chosen action number and detailed reasoning in this format:
 }}
 """
 
-    memory_update_prompt = """You are producing a block of text to inform an inteligent agent interacting with its environment.
-Summarize the following trajectory, a list of observations, actions, and rewards, and combine it with the previous summary. 
-Present the summary as a list of key rules to follow and limit the response to {word_limit} words or less.
-
-Previous Memory:
+    memory_update_prompt = """You are a reinforcement learning agent that has just completed a single episode in an environment. Your goal is to produce key information to help you interact with this environment in future episodes. 
+This is your previous memory as a block of text:
+[
 {previous_memory}
+]
 
-Trajectory:
+Here is the trajectory you have just completed:
+[
 {trajectory}
+]
+
+Return a new memory as a block of text based on your previous one and the trajectory you just completed. Limit your response to {word_limit} words.
 """
 
     def __init__(self, with_reasoning=False, memory_word_limit=500):
@@ -72,7 +75,7 @@ Trajectory:
                 self.response_full if with_reasoning else self.response_action_only
             )
         )
-        self.context = ""
+        self.context = "None"
         self.memory_word_limit = memory_word_limit
 
     def generate_prompt(self, observation, available_actions):
@@ -92,7 +95,7 @@ Trajectory:
     def generate_memory_update_prompt(self, history):
       trajectory_text = ""
       for i, step_context in enumerate(history):
-        trajectory_text += f"step: {i}\nobservation: {step_context['observation']['grid_text']}\naction:{step_context['action']}\nreward{step_context['reward']}\n\n"
+        trajectory_text += f"step: {i}\nobservation:\n{step_context['observation']['grid_text']}\naction: {step_context['action']}, reward: {step_context['reward']}\n\n"
 
       return self.memory_update_prompt.format(
             word_limit=self.memory_word_limit,
