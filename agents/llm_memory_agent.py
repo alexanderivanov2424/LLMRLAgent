@@ -72,13 +72,18 @@ class LLMMemoryAgent(BaseAgent):
         """
 
         if terminated or truncated:
-          prompt = self.config.generate_memory_update_prompt(self.history)
-          response = self._call_agent_memory_update(prompt)
-          print(type(response), response)
-          self.config.update_context(response.context)
+            prompt = self.config.generate_memory_update_prompt(self.history)
 
-          self.history = []
-          return
+            print()
+            print(prompt)
+            print()
+
+            response = self._call_agent_memory_update(prompt)
+            print(type(response), response)
+            self.config.update_context(response.context)
+
+            self.history = []
+            return
 
         context_update = {
             "observation": observation,
