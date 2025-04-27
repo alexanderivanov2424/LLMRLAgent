@@ -72,7 +72,7 @@ def create_agent(agent_type, env, hyperparams):
     return model
 
 
-def train_and_evaluate(agent_type, param_type, total_timesteps=30, seed=0):
+def train_and_evaluate(agent_type, param_type, total_timesteps=300000, seed=0):
     env_ids = [
         "MiniGrid-Empty-5x5-v0",
         "MiniGrid-DoorKey-5x5-v0",
