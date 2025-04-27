@@ -9,7 +9,7 @@ PLOT_SAVE_DIR = os.path.join("./plots","figures_generated")
 # quick demo of what plot generation code could look like
 
 experiment = ExperimentData.load("LLMRL_Agent_Comp_MiniGrid-Empty-5x5-v0")
-
+experiment.exp_name = "LLMRL_Memory_Agent_MiniGrid-Empty-5x5-v0"
 
 for agent_ID in experiment.get_agents():
   X = []
