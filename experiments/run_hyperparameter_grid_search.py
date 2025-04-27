@@ -2,6 +2,7 @@ import argparse
 import itertools
 import json
 import os
+import sys
 from typing import Any, Dict, List
 
 import gymnasium as gym
@@ -12,6 +13,10 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from agents.llm_agent import LLMAgent
 from agents.llm_context_agent import LLMContextAgent
 from agents.random_agent import RandomAgent
+
+# For older python versions
+if sys.version_info < (3, 12):
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Available environments
 ENVIRONMENTS = {
