@@ -71,6 +71,9 @@ class LLMMemoryAgent(BaseAgent):
           - Reward threshold
         """
 
+        print(observation)
+        exit(1)
+
         if terminated or truncated:
           prompt = self.config.generate_memory_update_prompt(self.history)
           response = self._call_agent_memory_update(prompt)
