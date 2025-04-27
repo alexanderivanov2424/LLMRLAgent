@@ -71,7 +71,7 @@ def create_agent(agent_type, env, hyperparams):
     return model
 
 
-def train_and_evaluate(agent_type, param_type, total_timesteps=300000, seed=0):
+def train_and_evaluate(agent_type, param_type, total_timesteps=30, seed=0):
     env_ids = [
         "MiniGrid-Empty-5x5-v0",
         "MiniGrid-DoorKey-5x5-v0",
@@ -94,8 +94,8 @@ def train_and_evaluate(agent_type, param_type, total_timesteps=300000, seed=0):
     if agent_type != "Random":
         eval_callback = EvalCallback(
             make_env(env_ids[0], seed),
-            best_model_save_path=f"./experiment_data/{agent_type.lower()}_generalist/",
-            log_path=f"./experiment_data/{agent_type.lower()}_generalist/",
+            best_model_save_path=f"./experiment_data/{agent_type}_{param_type}/",
+            log_path=f"./experiment_data/{agent_type}_{param_type}/",
             eval_freq=10000,
             deterministic=True,
             render=False,
@@ -107,7 +107,7 @@ def train_and_evaluate(agent_type, param_type, total_timesteps=300000, seed=0):
     else:
         results = evaluate_random_agent(env_ids, n_eval_episodes=10, seed=seed)
 
-    plot_generalist_results(results, env_ids)
+    plot_results(results, env_ids, agent_type, param_type)
 
 
 def evaluate_generalist_agent(model, env_ids, n_eval_episodes=10, seed=0):
@@ -150,20 +150,22 @@ def evaluate_random_agent(env_ids, n_eval_episodes=10, seed=0):
     return results
 
 
-def plot_generalist_results(results, env_ids):
+def plot_results(results, env_ids, agent_type, param_type):
+    print(env_ids)
     means = [results[env_id][0] for env_id in env_ids]
     stds = [results[env_id][1] for env_id in env_ids]
 
     plt.figure(figsize=(12, 6))
     x = np.arange(len(env_ids))
     plt.bar(x, means, yerr=stds, align='center', alpha=0.7, ecolor='black', capsize=10)
-    plt.xticks(x, [env_id.split('-')[-1] for env_id in env_ids], rotation=45)
+    plt.xticks(x, [''.join(env_id.split('-')[1:-2]) for env_id in env_ids], rotation=45)
     plt.ylabel('Mean Reward')
     plt.title('Agent Performance Across Environments')
     plt.tight_layout()
 
     os.makedirs("./plots", exist_ok=True)
-    plt.savefig("./plots/generalist_performance.png")
+    plt.savefig(f"./plots/{agent_type}_{param_type}_performance.png")
+
     plt.close()
 
 
