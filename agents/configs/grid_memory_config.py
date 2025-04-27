@@ -39,7 +39,7 @@ Choose the most efficient action to reach the goal. Remember:
 
 Please return your chosen action number and detailed reasoning in this format:
 {response_type}
-    """
+"""
 
     response_full = """
 {{
@@ -47,22 +47,24 @@ Please return your chosen action number and detailed reasoning in this format:
     "action": <number>,
     "rationalization": "I chose this action because... [explain why this action is the best choice]",
 }}
-    """
+"""
 
     response_action_only = """
 {{
     "action": <number>
 }}
-    """
+"""
 
-		memory_update_prompt = """You are producing a block of text to inform an inteligent agent interacting with its environment.
-		Summarize the following trajectory, a list of observations, actions, and rewards, and combine it with the previous summary. 
-		Present the summary as a list of key rules to follow and limit the response to {word_limit} words or less.
+    memory_update_prompt = """You are producing a block of text to inform an inteligent agent interacting with its environment.
+Summarize the following trajectory, a list of observations, actions, and rewards, and combine it with the previous summary. 
+Present the summary as a list of key rules to follow and limit the response to {word_limit} words or less.
 
-		{previous_memory}
+Previous Memory:
+{previous_memory}
 
-		{trajectory}
-		"""
+Trajectory:
+{trajectory}
+"""
 
     def __init__(self, with_reasoning=False, memory_word_limit=500):
         self.prompt = self.full_prompt.format(
