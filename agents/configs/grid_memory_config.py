@@ -73,7 +73,7 @@ Trajectory:
             )
         )
         self.context = ""
-				self.memory_word_limit = memory_word_limit
+        self.memory_word_limit = memory_word_limit
 
     def generate_prompt(self, observation, available_actions):
         action_list = "\n".join(
@@ -90,9 +90,9 @@ Trajectory:
         )
     
     def generate_memory_update_prompt(self, history):
-			trajectory_text = ""
-			for i, step_context in enumerate(history):
-				trajectory_text += f"step: {i}\nobservation: {step_context["observation"]}\naction:{step_context["action"]}\nreward{step_context["reward"]}\n\n"
+      trajectory_text = ""
+      for i, step_context in enumerate(history):
+        trajectory_text += f"step: {i}\nobservation: {step_context["observation"]}\naction:{step_context["action"]}\nreward{step_context["reward"]}\n\n"
 
       return self.memory_update_prompt.format(
             word_limit=self.memory_word_limit,
