@@ -7,7 +7,7 @@ from environment.base_environment import Action, ActionResponse, MemoryResponse
 from agents.configs.base_config import LLMRLAgentConfig
 
 
-class LLMContextAgent(BaseAgent):
+class LLMMemoryAgent(BaseAgent):
     def __init__(
         self,
         action_space: Dict[int, Action],
