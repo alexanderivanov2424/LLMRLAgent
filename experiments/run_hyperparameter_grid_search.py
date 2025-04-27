@@ -135,10 +135,10 @@ def main():
     )
     parser.add_argument(
         "--env",
-        type=str,
+        type=List[str],
         choices=list(ENVIRONMENTS.keys()),
-        default="Empty",
-        help="Environment to run",
+        default=list(ENVIRONMENTS.keys()),
+        help="Environments to run",
     )
     parser.add_argument(
         "--agent",
@@ -162,40 +162,43 @@ def main():
     )
     args = parser.parse_args()
 
-    env_id = ENVIRONMENTS[args.env]
-    hyperparam_combinations = generate_hyperparameter_combinations(args.agent)
+    print(f"Running grid search for {args.agent} on {args.env} environments...\n\n")
 
-    print(f"Starting grid search for {args.agent} on {args.env} environment...")
-    print(f"Total combinations to try: {len(hyperparam_combinations)}")
+    for env_name in args.env:
+        env_id = ENVIRONMENTS[env_name]
+        hyperparam_combinations = generate_hyperparameter_combinations(args.agent)
 
-    results = []
-    for i, hyperparams in enumerate(hyperparam_combinations, 1):
-        print(f"\nTrying combination {i}/{len(hyperparam_combinations)}")
-        print(f"Hyperparameters: {hyperparams}")
+        print(f"Starting grid search for {args.agent} on {env_name} environment...")
+        print(f"Total combinations to try: {len(hyperparam_combinations)}")
 
-        result = train_and_evaluate(
-            env_id,
-            args.agent,
-            hyperparams,
-            args.timesteps,
-            args.seed,
-            args.n_eval_episodes,
-        )
-        results.append(result)
+        results = []
+        for i, hyperparams in enumerate(hyperparam_combinations, 1):
+            print(f"\nTrying combination {i}/{len(hyperparam_combinations)}")
+            print(f"Hyperparameters: {hyperparams}")
+
+            result = train_and_evaluate(
+                env_id,
+                args.agent,
+                hyperparams,
+                args.timesteps,
+                args.seed,
+                args.n_eval_episodes,
+            )
+            results.append(result)
+            print(
+                f"Mean reward: {result['mean_reward']:.2f} +/- {result['std_reward']:.2f}"
+            )
+
+        # Save results
+        save_results(results, env_name, args.agent)
+
+        # Find best configuration
+        best_result = max(results, key=lambda x: x["mean_reward"])
+        print("\nBest configuration:")
+        print(f"Hyperparameters: {best_result['hyperparameters']}")
         print(
-            f"Mean reward: {result['mean_reward']:.2f} +/- {result['std_reward']:.2f}"
+            f"Mean reward: {best_result['mean_reward']:.2f} +/- {best_result['std_reward']:.2f}"
         )
-
-    # Save results
-    save_results(results, args.env, args.agent)
-
-    # Find best configuration
-    best_result = max(results, key=lambda x: x["mean_reward"])
-    print("\nBest configuration:")
-    print(f"Hyperparameters: {best_result['hyperparameters']}")
-    print(
-        f"Mean reward: {best_result['mean_reward']:.2f} +/- {best_result['std_reward']:.2f}"
-    )
 
 
 if __name__ == "__main__":
