@@ -79,9 +79,6 @@ for agent in agents:
 
         experiment.save()
 
-        print("context:\n", agent.config.context)
-        print()
-
 env.close()
 
 experiment.save()
