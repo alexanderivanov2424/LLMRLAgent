@@ -45,7 +45,7 @@ def run_episode(
 
         observation, reward, terminated, truncated, _ = env.step(action)
 
-        if step >= max_step and not (terminated or truncated):
+        if step >= max_step - 1 and not (terminated or truncated):
             truncated = True
 
         start_time = time.time()
