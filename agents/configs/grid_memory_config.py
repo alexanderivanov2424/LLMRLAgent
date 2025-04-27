@@ -55,8 +55,8 @@ Please return your chosen action number and detailed reasoning in this format:
 }}
 """
 
-    memory_update_prompt = """You are a reinforcement learning agent that has just completed a single episode in an environment. Your goal is to produce key information to help you interact with this environment in future episodes. 
-This is your previous memory as a block of text:
+    memory_update_prompt = """You are a reinforcement learning agent that has just completed a single episode in an environment. Your goal is to remember key pieces of information to your interaction with the environment in the next episode. 
+This is your previous list of hints:
 [
 {previous_memory}
 ]
@@ -66,7 +66,7 @@ Here is the trajectory you have just completed:
 {trajectory}
 ]
 
-Return a new memory as a block of text based on your previous one and the trajectory you just completed. Limit your response to {word_limit} words.
+Return a new list of hints to save as your memory. Make each hint a specific action the agent should or shouldn't take. Limit your response to {word_limit} words.
 """
 
     def __init__(self, with_reasoning=False, memory_word_limit=500):
