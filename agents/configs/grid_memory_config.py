@@ -61,12 +61,12 @@ This is your previous list of hints:
 {previous_memory}
 ]
 
-Here is the trajectory you have just completed:
+Here are the observations, actions, and rewards of the episode you have just completed:
 [
 {trajectory}
 ]
 
-Return a new list of hints to save as your memory. Make each hint a specific action the agent should or shouldn't take. Limit your response to {word_limit} words.
+Return a new list of the most important action and observation pairs to save as your memory. Make each hint a specific action the agent should or shouldn't take. Limit your response to {word_limit} words.
 """
 
     def __init__(self, with_reasoning=False, memory_word_limit=500):
