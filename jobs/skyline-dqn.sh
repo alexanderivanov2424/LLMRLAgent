@@ -21,4 +21,4 @@ source /users/jfinberg/scratch/LLMRLAgent/.venv/bin/activate
 cd /users/jfinberg/scratch/LLMRLAgent/experiments
 
 # Run program
-python run_hyperparameter_grid_search.py --agent dqn
+python run_hyperparameter_grid_search.py --agent DQN
