@@ -20,6 +20,7 @@ from agents.random_agent import RandomAgent
 from agents.base_agent import BaseAgent
 from agents.llm_agent import LLMAgent
 from agents.llm_context_agent import LLMContextAgent
+from agents.llm_memory_agent import LLMMemoryAgent
 
 # config imports
 from agents.configs.grid_config import GridConfig_1
