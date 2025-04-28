@@ -40,15 +40,20 @@ AGENTS = {
 
 HYPERPARAM_SPACES = {
     "DQN": {
-        "learning_rate": [1e-6, 5e-6, 1e-5, 5e-5, 0.0001, 0.0005, 0.001, 0.005, 0.01],
-        "train_freq": [1, 2, 4, 16, 48],
-        "exploration_initial_eps": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-        "exploration_final_eps": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-        "batch_size": [16, 32, 64, 128, 256],
-        "gradient_steps": [1, 2, 4, 8, 16],
-        "learning_starts": [1000, 10000, 100000],
-        "tau": [0.001, 0.01, 0.05],
-        "buffer_size": [500, 5000, 50000, 500000],
+        # "learning_rate": [1e-6, 5e-6, 1e-5, 5e-5, 0.0001, 0.0005, 0.001, 0.005, 0.01],
+        # "train_freq": [1, 2, 4, 16, 48],
+        # "exploration_initial_eps": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+        # "exploration_final_eps": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+        # "batch_size": [16, 32, 64, 128, 256],
+        # "gradient_steps": [1, 2, 4, 8, 16],
+        # "learning_starts": [1000, 10000, 100000],
+        # "tau": [0.001, 0.01, 0.05],
+        # "buffer_size": [500, 5000, 50000, 500000],
+        #
+        #
+        # First set of hyperparameters
+        "learning_starts": [500, 1000],
+        "buffer_size": [1000, 5000],
     },
     "PPO": {
         "learning_rate": [1e-4, 3e-4, 1e-3],
@@ -163,7 +168,7 @@ def main():
     parser.add_argument(
         "--timesteps",
         type=int,
-        default=100000,
+        default=1000,
         help="Total number of training timesteps",
     )
     parser.add_argument("--seed", type=int, default=0, help="Random seed")
