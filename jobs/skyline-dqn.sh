@@ -2,8 +2,6 @@
 
 # Request a GPU partition node and access to 1 GPU
 #SBATCH -p gpu --gres=gpu:1
-
-# Request 1 CPU core
 #SBATCH -n 4
 #SBATCH -t 24:00:00
 #SBATCH --mem=192G

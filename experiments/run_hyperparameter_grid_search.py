@@ -14,6 +14,8 @@ from stable_baselines3.common.evaluation import evaluate_policy
 if sys.version_info < (3, 12):
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import torch
+
 from agents.llm_agent import LLMAgent
 from agents.llm_context_agent import LLMContextAgent
 from agents.random_agent import RandomAgent
@@ -81,12 +83,18 @@ def train_and_evaluate(
     # Get the agent class
     agent_class = AGENTS[agent_type]
 
+    # Use cuda if DQN
+    if agent_type == "DQN":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    else:
+        device = "cpu"
+
     # Create the model
     model = agent_class(
         "MlpPolicy",
         env,
         **hyperparams,
-        verbose=0,  # Suppress training output
+        device=device,
     )
 
     # Train the model
