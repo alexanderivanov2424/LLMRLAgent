@@ -107,9 +107,10 @@ def train_and_evaluate(
     model = agent_class(
         "MlpPolicy",
         vec_env,
-        **hyperparams,
         device=device,
         policy_kwargs=dict(net_arch=[256, 256]),
+        seed=2,
+        **hyperparams,
     )
 
     # Train the model
