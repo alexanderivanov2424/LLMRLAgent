@@ -1,33 +1,35 @@
 import gymnasium as gym
-import numpy as np
-import torch as th
+from minigrid.wrappers import FlatObsWrapper
 from stable_baselines3 import DQN
 from stable_baselines3.common.evaluation import evaluate_policy
-from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
 
 
 def main():
     # Create the environment
-    env = gym.make("MiniGrid-Empty-5x5-v0", render_mode="rgb_array")
-    # vec_env = DummyVecEnv([lambda: env])
-    vec_env = env
+    def make_env():
+        env = gym.make("MiniGrid-Empty-5x5-v0")  # no render_mode while training
+        env = FlatObsWrapper(env)  # 1-D numeric Box, no mission
+        return env
+
+    vec_env = DummyVecEnv([make_env])
+    vec_env = VecMonitor(vec_env)
 
     # Create the DQN model with tuned hyperparameters
     model = DQN(
         "MlpPolicy",
-        env,
-        verbose=1,
+        vec_env,
+        learning_rate=3e-4,
+        buffer_size=50_000,
+        learning_starts=10_000,
+        batch_size=128,
         train_freq=16,
         gradient_steps=8,
-        gamma=0.99,
-        exploration_fraction=0.2,
-        exploration_final_eps=0.07,
-        target_update_interval=600,
-        learning_starts=1000,
-        buffer_size=10000,
-        batch_size=128,
-        learning_rate=4e-3,
+        target_update_interval=800,
+        exploration_fraction=0.1,
+        exploration_final_eps=0.05,
         policy_kwargs=dict(net_arch=[256, 256]),
+        gamma=0.99,
         seed=2,
     )
 
@@ -35,7 +37,7 @@ def main():
     print("Evaluating untrained agent...")
     mean_reward, std_reward = evaluate_policy(
         model,
-        vec_env,
+        model.get_env(),
         deterministic=True,
         n_eval_episodes=20,
     )
@@ -43,13 +45,13 @@ def main():
 
     # Train the agent
     print("Training agent...")
-    model.learn(total_timesteps=int(1.2e5), log_interval=10)
+    model.learn(total_timesteps=int(300_000), log_interval=10, progress_bar=True)
 
     # Evaluate the agent after training
     print("Evaluating trained agent...")
     mean_reward, std_reward = evaluate_policy(
         model,
-        vec_env,
+        model.get_env(),
         deterministic=True,
         n_eval_episodes=20,
     )
@@ -57,6 +59,7 @@ def main():
 
     # Visualize the trained agent
     print("Visualizing trained agent...")
+    env = make_env()
     obs, _ = env.reset()
     done = False
     total_reward = 0

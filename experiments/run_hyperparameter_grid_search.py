@@ -12,6 +12,7 @@ sys.modules["gym"] = gym
 from minigrid.wrappers import FlatObsWrapper
 from stable_baselines3 import DQN, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
 
 # For older python versions
 if sys.version_info < (3, 12):
@@ -81,12 +82,14 @@ def train_and_evaluate(
     env_id: str,
     agent_type: str,
     hyperparams: Dict[str, Any],
-    total_timesteps: int = 100000,
+    total_timesteps: int = 1000000,
     seed: int = 0,
     n_eval_episodes: int = 10,
 ) -> Dict[str, Any]:
     """Train and evaluate an agent with given hyperparameters."""
     env = make_env(env_id, seed)
+    vec_env = DummyVecEnv([lambda: env])
+    vec_env = VecMonitor(vec_env)
 
     # Get the agent class
     agent_class = AGENTS[agent_type]
@@ -100,7 +103,7 @@ def train_and_evaluate(
     # Create the model
     model = agent_class(
         "MlpPolicy",
-        env,
+        vec_env,
         **hyperparams,
         device=device,
     )
@@ -113,19 +116,13 @@ def train_and_evaluate(
         model,
         model.get_env(),
         n_eval_episodes=n_eval_episodes,
+        deterministic=True,
     )
-
-    print("mean_reward", mean_reward)
-    print("std_reward", std_reward)
 
     return {
         "hyperparameters": hyperparams,
-        "mean_reward": float(
-            mean_reward[0] if isinstance(mean_reward, list) else mean_reward
-        ),
-        "std_reward": float(
-            std_reward[0] if isinstance(std_reward, list) else std_reward
-        ),
+        "mean_reward": mean_reward,
+        "std_reward": std_reward,
     }
 
 
