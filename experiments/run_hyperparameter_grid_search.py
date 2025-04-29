@@ -119,6 +119,10 @@ def train_and_evaluate(
         deterministic=True,
     )
 
+    # Convert numpy float32 to Python float
+    mean_reward = float(mean_reward)
+    std_reward = float(std_reward)
+
     return {
         "hyperparameters": hyperparams,
         "mean_reward": mean_reward,
@@ -169,7 +173,7 @@ def main():
     parser.add_argument(
         "--timesteps",
         type=int,
-        default=1000,
+        default=1000000,
         help="Total number of training timesteps",
     )
     parser.add_argument("--seed", type=int, default=0, help="Random seed")
