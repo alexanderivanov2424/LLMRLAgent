@@ -114,6 +114,9 @@ def train_and_evaluate(
         deterministic=True,
     )
 
+    print("mean_reward", mean_reward)
+    print("std_reward", std_reward)
+
     return {
         "hyperparameters": hyperparams,
         "mean_reward": float(
