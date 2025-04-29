@@ -70,7 +70,7 @@ HYPERPARAM_SPACES = {
 def make_env(env_id: str, seed: int = 0) -> gym.Env:
     """Create a wrapped, monitored environment."""
     env = gym.make(env_id, render_mode="rgb_array")
-    env = FlatObsWrapper(env)  # Get full grid observation
+    # env = FlatObsWrapper(env)  # Get full grid observation
     return env
 
 
