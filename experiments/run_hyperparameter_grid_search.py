@@ -108,8 +108,6 @@ def train_and_evaluate(
         "MlpPolicy",
         vec_env,
         device=device,
-        policy_kwargs=dict(net_arch=[256, 256]),
-        seed=2,
         **hyperparams,
     )
 
