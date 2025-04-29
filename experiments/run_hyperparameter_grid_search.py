@@ -70,7 +70,7 @@ HYPERPARAM_SPACES = {
 def make_env(env_id: str, seed: int = 0) -> gym.Env:
     """Create a wrapped, monitored environment."""
     env = gym.make(env_id, render_mode="rgb_array")
-    # env = FlatObsWrapper(env)  # Get full grid observation
+    env = FlatObsWrapper(env)  # Get full grid observation
     return env
 
 
@@ -106,12 +106,10 @@ def train_and_evaluate(
     model.learn(total_timesteps=total_timesteps)
 
     # Evaluate the model
-    eval_env = make_env(env_id, seed)
     mean_reward, std_reward = evaluate_policy(
         model,
-        eval_env,
+        model.get_env(),
         n_eval_episodes=n_eval_episodes,
-        deterministic=True,
     )
 
     print("mean_reward", mean_reward)
