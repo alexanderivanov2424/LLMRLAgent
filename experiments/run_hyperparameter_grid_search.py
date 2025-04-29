@@ -6,9 +6,6 @@ import sys
 from typing import Any, Dict, List
 
 import gymnasium as gym
-
-sys.modules["gym"] = gym
-
 from minigrid.wrappers import FlatObsWrapper
 from stable_baselines3 import DQN, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -56,8 +53,8 @@ HYPERPARAM_SPACES = {
         #
         #
         # First set of hyperparameters
-        "learning_starts": [500, 1000],
-        "buffer_size": [1000, 5000],
+        "learning_starts": [50000, 100000],
+        "buffer_size": [50000, 100000],
     },
     "PPO": {
         "learning_rate": [1e-4, 3e-4, 1e-3],
