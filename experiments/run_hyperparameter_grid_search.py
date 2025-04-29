@@ -53,8 +53,16 @@ HYPERPARAM_SPACES = {
         #
         #
         # First set of hyperparameters
-        "learning_starts": [50000, 100000],
-        "buffer_size": [50000, 100000],
+        "learning_starts": [10000, 50000, 100000],
+        "buffer_size": [50000, 100000, 500000],
+        "gamma": [0.99],
+        "learning_rate": [3e-4],
+        "batch_size": [128],
+        "train_freq": [16],
+        "gradient_steps": [8],
+        "target_update_interval": [800],
+        "exploration_fraction": [0.1],
+        "exploration_final_eps": [0.05],
     },
     "PPO": {
         "learning_rate": [1e-4, 3e-4, 1e-3],
@@ -101,6 +109,7 @@ def train_and_evaluate(
         vec_env,
         **hyperparams,
         device=device,
+        policy_kwargs=dict(net_arch=[256, 256]),
     )
 
     # Train the model
