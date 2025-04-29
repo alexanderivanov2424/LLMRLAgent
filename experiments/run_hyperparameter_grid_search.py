@@ -6,6 +6,9 @@ import sys
 from typing import Any, Dict, List
 
 import gymnasium as gym
+
+sys.modules["gym"] = gym
+
 from minigrid.wrappers import FlatObsWrapper
 from stable_baselines3 import DQN, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -103,7 +106,7 @@ def train_and_evaluate(
     )
 
     # Train the model
-    model.learn(total_timesteps=total_timesteps)
+    model.learn(total_timesteps=total_timesteps, progress_bar=True)
 
     # Evaluate the model
     mean_reward, std_reward = evaluate_policy(
