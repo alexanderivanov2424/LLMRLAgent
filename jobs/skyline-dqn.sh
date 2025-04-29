@@ -6,6 +6,9 @@
 #SBATCH -t 24:00:00
 #SBATCH --mem=192G
 
+# Enable python logging
+export PYTHONUNBUFFERED=TRUE
+
 # Load a CUDA module
 module load cuda
 

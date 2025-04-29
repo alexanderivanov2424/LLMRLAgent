@@ -70,7 +70,7 @@ HYPERPARAM_SPACES = {
 
 def make_env(env_id: str, seed: int = 0) -> gym.Env:
     """Create a wrapped, monitored environment."""
-    env = gym.make(env_id, render_mode="rgb_array")
+    env = gym.make(env_id, seed=seed)
     env = FlatObsWrapper(env)  # Get full grid observation
     return env
 
@@ -81,11 +81,10 @@ def train_and_evaluate(
     hyperparams: Dict[str, Any],
     total_timesteps: int = 1000000,
     seed: int = 0,
-    n_eval_episodes: int = 10,
+    n_eval_episodes: int = 20,
 ) -> Dict[str, Any]:
     """Train and evaluate an agent with given hyperparameters."""
-    env = make_env(env_id, seed)
-    vec_env = DummyVecEnv([lambda: env])
+    vec_env = DummyVecEnv([lambda: make_env(env_id, seed)])
     vec_env = VecMonitor(vec_env)
 
     # Get the agent class
@@ -106,7 +105,11 @@ def train_and_evaluate(
     )
 
     # Train the model
-    model.learn(total_timesteps=total_timesteps, progress_bar=True)
+    model.learn(
+        total_timesteps=total_timesteps,
+        log_interval=10,
+        progress_bar=True,
+    )
 
     # Evaluate the model
     mean_reward, std_reward = evaluate_policy(
@@ -177,7 +180,7 @@ def main():
     parser.add_argument(
         "--n_eval_episodes",
         type=int,
-        default=10,
+        default=20,
         help="Number of episodes for evaluation",
     )
     args = parser.parse_args()
