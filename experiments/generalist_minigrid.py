@@ -174,7 +174,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--agent_type", type=str, required=True, choices=["DQN", "PPO", "Random"],
                         help="Agent to train: DQN, PPO, or Random")
-    parser.add_argument("--param_type", type=str, required=False, choices=["standard", "optimized", "generalist"],
+    parser.add_argument("--param_type", type=str, required=False, default="standard", choices=["standard", "optimized", "generalist"],
                         help="Hyperparameter set to use: standard, optimized, or generalist (DQN only rn).")
     args = parser.parse_args()
 
