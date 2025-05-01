@@ -92,7 +92,7 @@ Trajectory:
     def generate_memory_update_prompt(self, history):
       trajectory_text = ""
       for i, step_context in enumerate(history):
-        trajectory_text += f"step: {i}\nobservation: {step_context['observation']['image']}\naction:{step_context['action']}\nreward{step_context['reward']}\n\n"
+        trajectory_text += f"step: {i}\nobservation: {step_context['observation']['grid_text']}\naction:{step_context['action']}\nreward{step_context['reward']}\n\n"
 
       return self.memory_update_prompt.format(
             word_limit=self.memory_word_limit,
