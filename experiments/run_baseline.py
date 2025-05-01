@@ -42,9 +42,9 @@ HYPERPARAM_SPACES = {
         "train_freq": [4],
         "gradient_steps": [1],
         "target_update_interval": [1000],
-        "exploration_fraction": [0.1],
+        "exploration_fraction": [0.1], # Increase from 0.1 -> 0.5 for more exploration
         "exploration_initial_eps": [1.0],
-        "exploration_final_eps": [0.05],
+        "exploration_final_eps": [0.10], # Increase from 0.05 -> 0.10 for more exploration
     },
     "PPO": {
         "learning_rate": [3e-4],
