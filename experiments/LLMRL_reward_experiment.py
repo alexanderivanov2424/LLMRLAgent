@@ -113,7 +113,7 @@ ENVIRONMENTS = {
     "LavaGap": "MiniGrid-LavaGapS5-v0",
 }
 
-for friendly_name, env_name in ENVIRONMENTS:
-    print("Starting env", friendly_name, env_name)
+for env_name in ENVIRONMENTS.values():
+    print("Starting env", env_name)
     print()
     test_env(env_name)
