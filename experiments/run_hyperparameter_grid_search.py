@@ -63,6 +63,16 @@ HYPERPARAM_SPACES = {
         "target_update_interval": [800],
         "exploration_fraction": [0.1],
         "exploration_final_eps": [0.05],
+        #
+        # Second set of hyperparameters
+        # "learning_starts": [10000, 50000, 100000],
+        # "buffer_size": [500000, 1000000, 5000000],
+        # "gamma": [0.99],
+        # "learning_rate": [3e-4],
+        # "batch_size": [128],
+        # "train_freq": [16],
+        # "gradient_steps": [8],
+        # "target_update_interval": [800],
     },
     "PPO": {
         "learning_rate": [1e-4, 3e-4, 1e-3],
@@ -159,10 +169,10 @@ def main():
     )
     parser.add_argument(
         "--env",
-        type=List[str],
+        action="append",
         choices=list(ENVIRONMENTS.keys()),
-        default=list(ENVIRONMENTS.keys()),
-        help="Environments to run",
+        default=None,
+        help="Environments to run (can be specified multiple times)",
     )
     parser.add_argument(
         "--agent",
@@ -184,6 +194,10 @@ def main():
         help="Number of episodes for evaluation",
     )
     args = parser.parse_args()
+
+    # If no environments specified, use all environments
+    if args.env is None:
+        args.env = list(ENVIRONMENTS.keys())
 
     print(f"Running grid search for {args.agent} on {args.env} environments...\n\n")
 
