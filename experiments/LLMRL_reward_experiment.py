@@ -27,58 +27,93 @@ from agents.configs.grid_config import GridConfig_1
 from agents.configs.grid_context_config import GridContextConfig_1
 from agents.configs.grid_memory_config import GridMemoryConfig_1
 
-# Choose test environment here
-env_name = "MiniGrid-Empty-5x5-v0"
-experiment = ExperimentData.load(f"LLMRL_Agent_Comp_{env_name}")
+def test_env(env_name):
+    experiment = ExperimentData.load(f"LLM_Model_Comparison_{env_name}")
 
-# Create the environment using our new MiniGridEnvironment class
-env = MiniGridEnvironment(env_name=env_name)
+    # Create the environment using our new MiniGridEnvironment class
+    env = MiniGridEnvironment(env_name=env_name)
 
-random_agent = RandomAgent(env.action_space, env.observation_space)
+    random_agent = RandomAgent(env.action_space, env.observation_space)
 
-llm_agent = LLMAgent(
-    env.get_action_descriptions(),
-    env.get_valid_response(),
-    env.observation_space,
-    model="llama3.2",
-    config=GridConfig_1(),
-)
+    llm_agent = LLMAgent(
+        env.get_action_descriptions(),
+        env.get_valid_response(),
+        env.observation_space,
+        model="llama3.2",
+        config=GridConfig_1(),
+    )
 
-llm_context_agent = LLMContextAgent(
-    env.get_action_descriptions(),
-    env.get_valid_response(),
-    env.observation_space,
-    model="llama3.2",
-    config=GridContextConfig_1(),
-)
+    llm_context_agent = LLMContextAgent(
+        env.get_action_descriptions(),
+        env.get_valid_response(),
+        env.observation_space,
+        model="llama3.2",
+        config=GridContextConfig_1(),
+    )
 
-llm_memory_agent = LLMMemoryAgent(
-    env.get_action_descriptions(),
-    env.get_valid_response(),
-    env.observation_space,
-    model="llama3.2",
-    config=GridMemoryConfig_1(),
-)
+    llm_memory_agent = LLMMemoryAgent(
+        env.get_action_descriptions(),
+        env.get_valid_response(),
+        env.observation_space,
+        model="llama3.2",
+        config=GridMemoryConfig_1(),
+    )
 
-agents = [
-    #random_agent,
-    #llm_agent,
-    #llm_context_agent,
-    llm_memory_agent,
-]
+    llm_memory_agent_deepseek = LLMMemoryAgent(
+        env.get_action_descriptions(),
+        env.get_valid_response(),
+        env.observation_space,
+        model="deepseek-coder-v2",
+        config=GridMemoryConfig_1(),
+    )
+
+    llm_memory_agent_gemma = LLMMemoryAgent(
+        env.get_action_descriptions(),
+        env.get_valid_response(),
+        env.observation_space,
+        model="gemma2",
+        config=GridMemoryConfig_1(),
+    )
+
+    agents = [
+        #random_agent,
+        #llm_agent,
+        #llm_context_agent,
+        llm_memory_agent,
+        llm_memory_agent_deepseek,
+        llm_memory_agent_gemma,
+    ]
 
 
-for agent in agents:
+    for agent in agents:
+        print("Starting Agent:", agent.get_agent_ID)
+        print()
+        existing_epsiodes = experiment.get_agent_epsiode_count(agent.get_agent_ID())
 
-    existing_epsiodes = experiment.get_agent_epsiode_count(agent.get_agent_ID())
+        for episode in range(50):
+            if episode < existing_epsiodes:
+                continue
+            run_episode(experiment, env, agent, episode, max_step=25, seed=0)
 
-    for episode in range(100):
-        if episode < existing_epsiodes:
-            continue
-        run_episode(experiment, env, agent, episode, max_step=50, seed=0)
+            experiment.save()
 
-        experiment.save()
+    env.close()
 
-env.close()
+    experiment.save()
 
-experiment.save()
+
+ENVIRONMENTS = {
+    "Empty": "MiniGrid-Empty-5x5-v0",
+    "DoorKey": "MiniGrid-DoorKey-5x5-v0",
+    "GoToObj": "MiniGrid-GoToObject-6x6-N2-v0",
+    "MemoryS7": "MiniGrid-MemoryS11-v0",
+    "KeyCorridor": "MiniGrid-KeyCorridorS6R3-v0",
+    "UnlockPickup": "MiniGrid-Unlock-v0",
+    "MultiRoom": "MiniGrid-MultiRoom-N4-S5-v0",
+    "LavaGap": "MiniGrid-LavaGapS5-v0",
+}
+
+for friendly_name, env_name in ENVIRONMENTS:
+    print("Starting env", friendly_name, env_name)
+    print()
+    test_env(env_name)

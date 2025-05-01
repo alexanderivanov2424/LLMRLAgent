@@ -33,7 +33,7 @@ class LLMMemoryAgent(BaseAgent):
         self.valid_memory_response : MemoryResponse = create_model("MemoryResponse", context=(str, Field(description="New Agent Memory")))  # type: ignore
 
     def get_agent_ID(self):
-        return "LLMMemoryAgent_" + self.config.__class__.__name__
+        return self.__class__.__name__ + "_" + self.model + "_" + self.config.__class__.__name__
 
     def policy(self, observation: Dict[str, Any]) -> int:
         """
