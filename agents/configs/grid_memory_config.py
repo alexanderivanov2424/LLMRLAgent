@@ -66,7 +66,7 @@ Trajectory:
 {trajectory}
 """
 
-    def __init__(self, with_reasoning=False, memory_word_limit=500):
+    def __init__(self, with_reasoning=False, memory_word_limit=100):
         self.prompt = self.full_prompt.format(
             response_type=(
                 self.response_full if with_reasoning else self.response_action_only
@@ -92,7 +92,7 @@ Trajectory:
     def generate_memory_update_prompt(self, history):
       trajectory_text = ""
       for i, step_context in enumerate(history):
-        trajectory_text += f"step: {i}\nobservation: {step_context['observation']}\naction:{step_context['action']}\nreward{step_context['reward']}\n\n"
+        trajectory_text += f"step: {i}\nobservation: {step_context['observation']['image']}\naction:{step_context['action']}\nreward{step_context['reward']}\n\n"
 
       return self.memory_update_prompt.format(
             word_limit=self.memory_word_limit,
