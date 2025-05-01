@@ -86,7 +86,7 @@ def test_env(env_name):
 
 
     for agent in agents:
-        print("Starting Agent:", agent.get_agent_ID)
+        print("Starting Agent:", agent.get_agent_ID())
         print()
         existing_epsiodes = experiment.get_agent_epsiode_count(agent.get_agent_ID())
 
