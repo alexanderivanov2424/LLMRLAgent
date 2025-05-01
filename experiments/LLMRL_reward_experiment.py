@@ -59,11 +59,11 @@ def test_env(env_name):
         config=GridMemoryConfig_1(),
     )
 
-    llm_memory_agent_deepseek = LLMMemoryAgent(
+    llm_memory_agent_codellama = LLMMemoryAgent(
         env.get_action_descriptions(),
         env.get_valid_response(),
         env.observation_space,
-        model="deepseek-coder-v2",
+        model="codellama",
         config=GridMemoryConfig_1(),
     )
 
@@ -80,7 +80,7 @@ def test_env(env_name):
         #llm_agent,
         #llm_context_agent,
         llm_memory_agent,
-        llm_memory_agent_deepseek,
+        llm_memory_agent_codellama,
         llm_memory_agent_gemma,
     ]
 
@@ -90,9 +90,10 @@ def test_env(env_name):
         print()
         existing_epsiodes = experiment.get_agent_epsiode_count(agent.get_agent_ID())
 
+        if existing_epsiodes >= 50:
+            continue
+
         for episode in range(50):
-            if episode < existing_epsiodes:
-                continue
             run_episode(experiment, env, agent, episode, max_step=25, seed=0)
 
             experiment.save()
