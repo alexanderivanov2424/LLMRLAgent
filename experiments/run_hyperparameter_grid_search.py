@@ -75,13 +75,9 @@ HYPERPARAM_SPACES = {
         # "target_update_interval": [800],
     },
     "PPO": {
-        "learning_rate": [1e-4, 3e-4, 1e-3],
-        "n_steps": [1024, 2048, 4096],
-        "batch_size": [32, 64, 128],
+        "learning_rate": [3e-3, 3e-4, 3e-5],
         "n_epochs": [5, 10, 20],
-        "gamma": [0.9, 0.95, 0.99],
         "gae_lambda": [0.9, 0.95, 0.99],
-        "clip_range": [0.1, 0.2, 0.3],
     },
 }
 
