@@ -101,7 +101,7 @@ Trajectory:
         )
 
     def update_context(self, new_memory):
-        self.context = new_memory
+        self.context = new_memory[0:self.memory_word_limit*10]
 
     def clear_context(self):
         self.context = ""
