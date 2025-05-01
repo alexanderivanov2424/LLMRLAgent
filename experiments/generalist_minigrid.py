@@ -1,7 +1,11 @@
 import argparse
 import os
+import sys
 from pathlib import Path
 import random
+
+# Add project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -14,6 +18,7 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from minigrid.wrappers import FlatObsWrapper
 
 from agent_configs import get_hyperparams
+from utils.experiment_data import ExperimentData
 
 
 def make_env(env_id, seed=0):
@@ -72,29 +77,80 @@ def create_agent(agent_type, env, hyperparams):
     return model
 
 
+class GeneralistEvalCallback(EvalCallback):
+    def __init__(self, eval_env, experiment_data, agent_id, **kwargs):
+        super().__init__(eval_env, **kwargs)
+        self.experiment_data = experiment_data
+        self.agent_id = agent_id
+        self.episode_num = 0
+        self.last_eval_step = 0
+        
+        # Create a simple agent-like object for logging
+        self.agent_wrapper = type('AgentWrapper', (), {'get_agent_ID': lambda self: agent_id})()
+        
+    def _on_step(self):
+        result = super()._on_step()
+        
+        # Check if an evaluation was just performed (n_calls divisible by eval_freq)
+        if self.n_calls % self.eval_freq == 0 and self.n_calls > self.last_eval_step:
+            # Get the last evaluation result
+            mean_reward = self.last_mean_reward
+            
+            # Log rewards using experiment_data's methods
+            self.experiment_data.log_agent_episode_reward_meta_stats(
+                self.agent_wrapper, 
+                self.episode_num, 
+                mean_reward,  # sum_reward
+                mean_reward   # avg_reward (same as sum since it's already averaged)
+            )
+            
+            # Also log a placeholder episode length
+            self.experiment_data.log_agent_episode_length(
+                self.agent_wrapper,
+                self.episode_num,
+                1  # placeholder length
+            )
+            
+            self.experiment_data.save()
+            self.episode_num += 1
+            self.last_eval_step = self.n_calls
+            
+        return result
+
+
 def train_and_evaluate(agent_type, param_type, total_timesteps=300000, seed=0):
-    env_ids = [
+    train_env_ids = [
         "MiniGrid-Empty-5x5-v0",
-        "MiniGrid-DoorKey-5x5-v0",
-        "MiniGrid-GoToObject-8x8-N2-v0",
+        # "MiniGrid-DoorKey-5x5-v0",
+        # "MiniGrid-GoToObject-8x8-N2-v0",
         # "MiniGrid-MemoryS7-v0",
         # "MiniGrid-KeyCorridorS3R3-v0",
         # "MiniGrid-UnlockPickup-v0",
         # "MiniGrid-MultiRoom-N2-S4-v0",
         # "MiniGrid-LavaGapS5-v0",
-    ] 
+    ]
     
-    env = MultiEnvSampler(env_ids, seed)
+    eval_env_id = "MiniGrid-Empty-8x8-v0"
+    
+    train_env = MultiEnvSampler(train_env_ids, seed)
+    eval_env = make_env(eval_env_id, seed)
 
+    experiment_name = f"Generalist_{agent_type}_{param_type}_{eval_env_id}"
+    experiment = ExperimentData.load(experiment_name)
+    
     hyperparams = None
     if agent_type != "Random":
         hyperparams = get_hyperparams(agent_type, param_type)
 
-    model = create_agent(agent_type, env, hyperparams)
+    model = create_agent(agent_type, train_env, hyperparams)
+    
+    agent_id = f"{agent_type}_{param_type}"
 
     if agent_type != "Random":
-        eval_callback = EvalCallback(
-            make_env(env_ids[0], seed),
+        eval_callback = GeneralistEvalCallback(
+            eval_env,
+            experiment,
+            agent_id,
             best_model_save_path=f"./experiment_data/{agent_type}_{param_type}/",
             log_path=f"./experiment_data/{agent_type}_{param_type}/",
             eval_freq=10000,
@@ -104,11 +160,58 @@ def train_and_evaluate(agent_type, param_type, total_timesteps=300000, seed=0):
 
         model.learn(total_timesteps=total_timesteps, callback=eval_callback)
 
-        results = evaluate_generalist_agent(model, env_ids)
+        results = evaluate_generalist_agent(model, train_env_ids)
     else:
-        results = evaluate_random_agent(env_ids, n_eval_episodes=10, seed=seed)
+        agent_id = "RandomAgent"
+        
+        agent_wrapper = type('AgentWrapper', (), {'get_agent_ID': lambda self: agent_id})()
+        
+        try:
+            for episode in range(int(total_timesteps/10000)):  
+                rewards = []
+                for _ in range(10):  # 10 episodes per evaluation
+                    try:
+                        obs, _ = eval_env.reset()
+                        done = False
+                        truncated = False
+                        episode_reward = 0
+                        while not (done or truncated):
+                            action = eval_env.action_space.sample()
+                            obs, reward, done, truncated, info = eval_env.step(action)
+                            episode_reward += reward
+                        rewards.append(episode_reward)
+                    except Exception as e:
+                        print(f"Error during random agent evaluation episode: {e}")
+                
+                if rewards:  
+                    mean_reward = np.mean(rewards)
+                    
+                    experiment.log_agent_episode_reward_meta_stats(
+                        agent_wrapper, 
+                        episode, 
+                        mean_reward,  # sum_reward
+                        mean_reward   # avg_reward 
+                    )
+                    
+                    experiment.log_agent_episode_length(
+                        agent_wrapper,
+                        episode,
+                        len(rewards)  # use number of evaluation episodes as length
+                    )
+                    
+                    experiment.save()
+                    print(f"Random agent evaluation {episode}: mean reward = {mean_reward:.2f}")
+                
+        except Exception as e:
+            print(f"Error in random agent evaluation loop: {e}")
+            
+        results = evaluate_random_agent(train_env_ids, n_eval_episodes=10, seed=seed)
 
-    plot_results(results, env_ids, agent_type, param_type)
+    plot_results(results, train_env_ids, agent_type, param_type) 
+    experiment.save()
+    
+    # Plot the learning curve
+    plot_learning_curve(experiment, f"{agent_type}_{param_type}_learning_curve.png")
 
 
 def evaluate_generalist_agent(model, env_ids, n_eval_episodes=10, seed=0):
@@ -167,6 +270,35 @@ def plot_results(results, env_ids, agent_type, param_type):
     os.makedirs("./plots", exist_ok=True)
     plt.savefig(f"./plots/{agent_type}_{param_type}_performance.png")
 
+    plt.close()
+
+
+def plot_learning_curve(experiment, filename):
+    plt.figure(figsize=(10, 6))
+    
+    for agent_id in experiment.get_agents():
+        X = []
+        Y = []
+        
+        episode_count = experiment.get_agent_epsiode_count(agent_id)
+        total_reward = 0
+        
+        for episode in range(episode_count):
+            reward = experiment.get_agent_episode_sum_reward(agent_id, episode)
+            total_reward += reward
+            
+            X.append(episode)
+            Y.append(reward)
+            
+        plt.plot(X, Y, label=agent_id)
+        print(f"Average Reward for {agent_id}: {total_reward / episode_count:.2f}")
+    
+    plt.title("Generalist Agent Cumulative Reward Over Episode #")
+    plt.legend()
+    plt.tight_layout()
+    
+    os.makedirs("./plots", exist_ok=True)
+    plt.savefig(f"./plots/{filename}")
     plt.close()
 
 

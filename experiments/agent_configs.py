@@ -23,6 +23,20 @@ ppo_optimized_hyperparams = {
         "ent_coef": 0.001,
 }
 
+# Generalist PPO: Modified for multi-environment training
+ppo_generalist_hyperparams = {
+    "learning_rate": 1e-4,
+    "n_steps": 2048,           # Longer steps to collect diverse experiences
+    "batch_size": 64,          # Standard batch size
+    "n_epochs": 8,             # More epochs for better generalization
+    "gamma": 0.99,             # Standard discount factor
+    "gae_lambda": 0.95,        # Standard GAE lambda
+    "clip_range": 0.2,         # Standard clip range
+    "ent_coef": 0.01,          # Higher entropy to encourage exploration across different environments
+    "vf_coef": 0.5,            # Standard value function coefficient
+    "max_grad_norm": 0.5,      # Standard gradient clipping
+}
+
 # -------------DQN-------------
 # Standard DQN hyperparameters (from Stable Baselines3 defaults)
 dqn_standard_hyperparams = {
@@ -88,4 +102,6 @@ def get_hyperparams(agent_type: str, param_type: str):
             return ppo_standard_hyperparams
         elif param_type == "optimized":
             return ppo_optimized_hyperparams
+        elif param_type == "generalist":
+            return ppo_generalist_hyperparams
     return None

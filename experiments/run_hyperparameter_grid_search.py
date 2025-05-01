@@ -94,16 +94,13 @@ def train_and_evaluate(
     vec_env = DummyVecEnv([lambda: make_env(env_id)])
     vec_env = VecMonitor(vec_env)
 
-    # Get the agent class
     agent_class = AGENTS[agent_type]
 
-    # Use cuda if DQN
     if agent_type == "DQN":
         device = "cuda" if torch.cuda.is_available() else "cpu"
     else:
         device = "cpu"
 
-    # Create the model
     model = agent_class(
         "MlpPolicy",
         vec_env,
@@ -111,14 +108,12 @@ def train_and_evaluate(
         **hyperparams,
     )
 
-    # Train the model
     model.learn(
         total_timesteps=total_timesteps,
         log_interval=10,
         progress_bar=True,
     )
 
-    # Evaluate the model
     mean_reward, std_reward = evaluate_policy(
         model,
         model.get_env(),
@@ -126,7 +121,6 @@ def train_and_evaluate(
         deterministic=True,
     )
 
-    # Convert numpy float32 to Python float
     mean_reward = float(mean_reward)
     std_reward = float(std_reward)
 
@@ -217,10 +211,8 @@ def main():
                 f"Mean reward: {result['mean_reward']:.2f} +/- {result['std_reward']:.2f}"
             )
 
-        # Save results
         save_results(results, env_name, args.agent)
 
-        # Find best configuration
         best_result = max(results, key=lambda x: x["mean_reward"])
         print("\nBest configuration:")
         print(f"Hyperparameters: {best_result['hyperparameters']}")
