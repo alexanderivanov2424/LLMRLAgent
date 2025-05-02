@@ -127,17 +127,9 @@ class LLMMemoryAgent(BaseAgent):
                 }
             ],
             model=self.model,
-            format=self.valid_memory_response.model_json_schema(),
         )
 
-        if (
-            response is None
-            or response.message is None
-            or response.message.content is None
-        ):
-            raise ValueError("Model returned invalid response")
-
-        return self.valid_memory_response.model_validate_json(response.message.content)
+        return response.message.content
 
     def _choose_action(self, prompt: str) -> ActionResponse:
         """
