@@ -31,6 +31,9 @@ KEY_AGENT_EPISODE_SUM_REWARD = "sum_reward"
 KEY_AGENT_EPISODE_TIME_POLICY = "policy_time"
 KEY_AGENT_EPISODE_TIME_UPDATE = "update_time"
 
+# New key for storing multi-env evaluation results
+KEY_AGENT_MULTI_ENV_EVAL_REWARDS = "multi_env_eval_rewards"
+
 
 class ExperimentData:
 
@@ -144,6 +147,13 @@ class ExperimentData:
         agent_episode = self._get_agent_episode_dict(agent_ID, episode_number)
         agent_episode[KEY_AGENT_EPISODE_TIME_UPDATE] = time
 
+    def log_agent_multi_env_eval_rewards(
+        self, agent_ID: str, eval_event_num: int, env_rewards_dict: dict
+    ):
+        """Logs rewards from multiple environments for a single evaluation event."""
+        agent_episode = self._get_agent_episode_dict(agent_ID, eval_event_num)
+        agent_episode[KEY_AGENT_MULTI_ENV_EVAL_REWARDS] = env_rewards_dict
+
     ###############################
     # functions to get out the data more easily (for plots, visuals)
 
@@ -198,3 +208,11 @@ class ExperimentData:
             return agent_episode[KEY_AGENT_EPISODE_TIME_UPDATE]
         print("[Warning] No Episode Update Time Data")
         return -1
+
+    def get_agent_multi_env_eval_rewards(self, agent_ID, eval_event_num):
+        """Gets the dictionary of rewards per environment for a specific evaluation event."""
+        agent_episode = self._get_agent_episode_dict(agent_ID, eval_event_num)
+        if KEY_AGENT_MULTI_ENV_EVAL_REWARDS in agent_episode:
+            return agent_episode[KEY_AGENT_MULTI_ENV_EVAL_REWARDS]
+        # print(f"[Warning] No Multi-Env Eval Reward Data for ep {eval_event_num}") # Optional Warning
+        return None # Return None if data for this event doesn't exist
