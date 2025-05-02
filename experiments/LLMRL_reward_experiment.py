@@ -90,7 +90,6 @@ def test_env(env_name):
         llm_memory_agent,
         llm_memory_agent_codellama,
         llm_memory_agent_gemma,
-        llm_memory_agent_deepseek,
     ]
 
 
