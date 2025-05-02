@@ -129,7 +129,7 @@ class LLMMemoryAgent(BaseAgent):
             model=self.model,
         )
 
-        return response
+        return response['message']['content']
 
     def _choose_action(self, prompt: str) -> ActionResponse:
         """
