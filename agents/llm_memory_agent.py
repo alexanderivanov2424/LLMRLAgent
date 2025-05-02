@@ -82,7 +82,7 @@ class LLMMemoryAgent(BaseAgent):
         if terminated or truncated:
           prompt = self.config.generate_memory_update_prompt(self.history)
           response = self._call_agent_memory_update(prompt)
-          self.config.update_context(response.context)
+          self.config.update_context(response)
 
           self.history = []
           return
@@ -128,7 +128,7 @@ class LLMMemoryAgent(BaseAgent):
             ],
             model=self.model,
         )
-        
+
         return response
 
     def _choose_action(self, prompt: str) -> ActionResponse:
