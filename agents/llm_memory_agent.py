@@ -6,6 +6,17 @@ from agents.base_agent import BaseAgent
 from environment.base_environment import Action, ActionResponse, MemoryResponse
 from agents.configs.base_config import LLMRLAgentConfig
 
+import asyncio
+from asyncio import TaskGroup
+
+class TerminateTaskGroup(Exception):
+    """Exception raised to terminate a task group."""
+
+async def force_terminate_task_group():
+    """Used to force termination of a task group."""
+    raise TerminateTaskGroup()
+
+
 
 class LLMMemoryAgent(BaseAgent):
     def __init__(
@@ -90,16 +101,31 @@ class LLMMemoryAgent(BaseAgent):
 
     def _call_agent(self, prompt: str) -> ActionResponse:
         """Call the agent with the given prompt"""
-        response = chat(
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-            model=self.model,
-            format=self.valid_response.model_json_schema(),
-        )
+
+        response = None
+
+        async def async_chat():
+            response = chat(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+                model=self.model,
+                format=self.valid_response.model_json_schema(),
+            )
+
+        async def run_with_timeout():
+            try:
+                async with TaskGroup() as group:
+                    group.create_task(async_chat)
+                    await asyncio.sleep(20)
+                    group.create_task(force_terminate_task_group())
+            except* TerminateTaskGroup:
+                return ActionResponse(action=0, reasoning="")
+
+        asyncio.run(run_with_timeout())
 
         if (
             response is None
