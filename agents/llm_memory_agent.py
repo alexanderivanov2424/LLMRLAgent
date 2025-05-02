@@ -32,8 +32,6 @@ class LLMMemoryAgent(BaseAgent):
         self.valid_response = valid_response
         self.valid_memory_response : MemoryResponse = create_model("MemoryResponse", context=(str, Field(description="New Agent Memory")))  # type: ignore
 
-        self.max_prompt_len = 1500
-
     def get_agent_ID(self):
         return self.__class__.__name__ + "_" + self.model + "_" + self.config.__class__.__name__
 
@@ -92,11 +90,6 @@ class LLMMemoryAgent(BaseAgent):
 
     def _call_agent(self, prompt: str) -> ActionResponse:
         """Call the agent with the given prompt"""
-        if len(prompt) > self.max_prompt_len:
-            self.max_prompt_len = len(prompt)
-            print("LARGE PROMPT:", self.max_prompt_len)
-            print(prompt)
-            print()
         response = chat(
             messages=[
                 {

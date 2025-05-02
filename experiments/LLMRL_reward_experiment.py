@@ -94,7 +94,7 @@ def test_env(env_name):
             continue
 
         for episode in range(50):
-            run_episode(experiment, env, agent, episode, max_step=25, seed=0)
+            run_episode(experiment, env, agent, episode, max_step=100, seed=0)
 
             experiment.save()
 
@@ -108,10 +108,11 @@ ENVIRONMENTS = {
     "DoorKey": "MiniGrid-DoorKey-5x5-v0",
     "GoToObj": "MiniGrid-GoToObject-6x6-N2-v0",
     "MemoryS7": "MiniGrid-MemoryS11-v0",
-    "KeyCorridor": "MiniGrid-KeyCorridorS6R3-v0",
-    "UnlockPickup": "MiniGrid-Unlock-v0",
-    "MultiRoom": "MiniGrid-MultiRoom-N4-S5-v0",
-    "LavaGap": "MiniGrid-LavaGapS5-v0",
+
+    # "KeyCorridor": "MiniGrid-KeyCorridorS6R3-v0",
+    # "UnlockPickup": "MiniGrid-Unlock-v0",
+    # "MultiRoom": "MiniGrid-MultiRoom-N4-S5-v0",
+    # "LavaGap": "MiniGrid-LavaGapS5-v0",
 }
 
 for env_name in ENVIRONMENTS.values():

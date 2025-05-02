@@ -72,7 +72,7 @@ Trajectory:
                 self.response_full if with_reasoning else self.response_action_only
             )
         )
-        self.context = ""
+        self.memory = ""
         self.memory_word_limit = memory_word_limit
 
     def generate_prompt(self, observation, available_actions):
@@ -86,7 +86,7 @@ Trajectory:
         return self.prompt.format(
             state=observation.get("grid_text"),
             action_list=action_list,
-            context=self.context,
+            context=self.memory,
         )
     
     def generate_memory_update_prompt(self, history):
@@ -96,12 +96,12 @@ Trajectory:
 
       return self.memory_update_prompt.format(
             word_limit=self.memory_word_limit,
-            previous_memory=self.context,
+            previous_memory=self.memory,
             trajectory=trajectory_text
         )
 
     def update_context(self, new_memory):
-        self.context = new_memory[0:self.memory_word_limit*10]
+        self.memory = new_memory[0:self.memory_word_limit*10]
 
     def clear_context(self):
-        self.context = ""
+        self.memory = ""
