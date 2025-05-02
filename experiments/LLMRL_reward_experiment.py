@@ -104,9 +104,9 @@ def test_env(env_name):
 
 
 ENVIRONMENTS = {
-    "Empty": "MiniGrid-Empty-5x5-v0",
-    "DoorKey": "MiniGrid-DoorKey-5x5-v0",
-    "GoToObj": "MiniGrid-GoToObject-6x6-N2-v0",
+    # "Empty": "MiniGrid-Empty-5x5-v0",
+    # "DoorKey": "MiniGrid-DoorKey-5x5-v0",
+    # "GoToObj": "MiniGrid-GoToObject-6x6-N2-v0",
     "MemoryS7": "MiniGrid-MemoryS11-v0",
 
     # "KeyCorridor": "MiniGrid-KeyCorridorS6R3-v0",
