@@ -59,6 +59,14 @@ def test_env(env_name):
         config=GridMemoryConfig_1(),
     )
 
+    llm_memory_agent_deepseek = LLMMemoryAgent(
+        env.get_action_descriptions(),
+        env.get_valid_response(),
+        env.observation_space,
+        model="deepseek-coder-v2",
+        config=GridMemoryConfig_1(),
+    )
+
     llm_memory_agent_codellama = LLMMemoryAgent(
         env.get_action_descriptions(),
         env.get_valid_response(),
@@ -82,6 +90,7 @@ def test_env(env_name):
         llm_memory_agent,
         llm_memory_agent_codellama,
         llm_memory_agent_gemma,
+        llm_memory_agent_deepseek,
     ]
 
 
@@ -94,7 +103,7 @@ def test_env(env_name):
             continue
 
         for episode in range(50):
-            run_episode(experiment, env, agent, episode, max_step=100, seed=0)
+            run_episode(experiment, env, agent, episode, max_step=50, seed=0)
 
             experiment.save()
 
@@ -104,9 +113,9 @@ def test_env(env_name):
 
 
 ENVIRONMENTS = {
-    # "Empty": "MiniGrid-Empty-5x5-v0",
-    # "DoorKey": "MiniGrid-DoorKey-5x5-v0",
-    # "GoToObj": "MiniGrid-GoToObject-6x6-N2-v0",
+    "Empty": "MiniGrid-Empty-5x5-v0",
+    "DoorKey": "MiniGrid-DoorKey-5x5-v0",
+    "GoToObj": "MiniGrid-GoToObject-6x6-N2-v0",
     "MemoryS7": "MiniGrid-MemoryS11-v0",
 
     # "KeyCorridor": "MiniGrid-KeyCorridorS6R3-v0",
