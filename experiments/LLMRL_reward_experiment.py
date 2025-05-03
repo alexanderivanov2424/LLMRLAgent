@@ -25,7 +25,8 @@ from agents.llm_memory_agent import LLMMemoryAgent
 # config imports
 from agents.configs.grid_config import GridConfig_1
 from agents.configs.grid_context_config import GridContextConfig_1
-from agents.configs.grid_memory_config import GridMemoryConfig_1, GridMemoryConfig_2
+from agents.configs.grid_memory_config import GridMemoryConfig_1
+from agents.configs.grid_memory_config2 import GridMemoryConfig_2
 
 def test_env(env_name):
     experiment = ExperimentData.load(f"LLM_Model_Comparison_config2_{env_name}")
