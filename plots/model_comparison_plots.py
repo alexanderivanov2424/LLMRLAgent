@@ -17,14 +17,13 @@ def generate_plot(exp_name, title, plot_name):
 
   experiment = ExperimentData.load("SAVED_DATA/" + exp_name)
 
-
   for agent_ID in experiment.get_agents():
     X = []
     Y = []
 
     episode_count = experiment.get_agent_epsiode_count(agent_ID)
     for episode_number in range(episode_count):
-      reward = experiment.get_agent_episode_sum_reward(agent_ID, episode_number)
+      reward = experiment.get_agent_episode_average_reward(agent_ID, episode_number)
 
       X.append(episode_number)
       Y.append(reward)
@@ -51,6 +50,19 @@ plot_name = "LLM_Comp_MiniGrid-DoorKey-5x5-v0"
 generate_plot(exp_name, title, plot_name)
 
 
-exp_name = "LLM_Model_Comparison_MiniGrid-Empty-5x5-v0.json"
-exp_name = "LLM_Model_Comparison_MiniGrid-GoToObject-6x6-N2-v0.json"
-exp_name = "LLM_Model_Comparison_MiniGrid-MemoryS11-v0.json"
+exp_name = "LLM_Model_Comparison_MiniGrid-Empty-5x5-v0"
+title = "LLMRL Agent Reward Over Episodes on Empty-5x5 Environment"
+plot_name = "LLM_Comp_MiniGrid-Empty-5x5-v0"
+generate_plot(exp_name, title, plot_name)
+
+
+exp_name = "LLM_Model_Comparison_MiniGrid-GoToObject-6x6-N2-v0"
+title = "LLMRL Agent Reward Over Episodes on GoToObject-6x6 Environment"
+plot_name = "LLM_Comp_MiniGrid-GoToObject-6x6-N2-v0"
+generate_plot(exp_name, title, plot_name)
+
+
+exp_name = "LLM_Model_Comparison_MiniGrid-MemoryS11-v0"
+title = "LLMRL Agent Reward Over Episodes on MemoryS11 Environment"
+plot_name = "LLM_Comp_MiniGrid-MemoryS11-v0"
+generate_plot(exp_name, title, plot_name)
