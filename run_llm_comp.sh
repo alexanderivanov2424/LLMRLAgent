@@ -7,6 +7,6 @@
 #SBATCH --mem=16G
 
 module load ollama
-ollama serve & > /dev/null 2>&1
+ollama serve &>- &
 
 python3 -m experiments.LLMRL_reward_experiment
