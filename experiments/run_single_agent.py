@@ -43,7 +43,11 @@ ENV_HYPERPARAMS = {
             "exploration_fraction": 0.1,
             "exploration_final_eps": 0.05,
         },
-        "PPO": {},
+        "PPO": {
+            "learning_rate": 3e-5,
+            "n_epochs": 20,
+            "gae_lambda": 0.9,
+        },
     },
     "DoorKey": {
         "DQN": {
@@ -58,7 +62,11 @@ ENV_HYPERPARAMS = {
             "exploration_fraction": 0.1,
             "exploration_final_eps": 0.05,
         },
-        "PPO": {},
+        "PPO": {
+            "learning_rate": 3e-5,
+            "n_epochs": 20,
+            "gae_lambda": 0.9,
+        },
     },
     "GoToObj": {
         "DQN": {
@@ -73,7 +81,11 @@ ENV_HYPERPARAMS = {
             "exploration_fraction": 0.1,
             "exploration_final_eps": 0.05,
         },
-        "PPO": {},
+        "PPO": {
+            "learning_rate": 3e-5,
+            "n_epochs": 20,
+            "gae_lambda": 0.9,
+        },
     },
     "MemoryS7": {
         "DQN": {
@@ -88,7 +100,11 @@ ENV_HYPERPARAMS = {
             "exploration_fraction": 0.1,
             "exploration_final_eps": 0.05,
         },
-        "PPO": {},
+        "PPO": {
+            "learning_rate": 3e-5,
+            "n_epochs": 20,
+            "gae_lambda": 0.95,
+        },
     },
     # Add more environment-specific hyperparameters as needed
 }
@@ -262,3 +278,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
