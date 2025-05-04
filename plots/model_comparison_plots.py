@@ -10,9 +10,14 @@ PLOT_SAVE_DIR = os.path.join("./plots","figures_generated")
 AGENT_NAME = {}
 AGENT_NAME["RandomAgent"] = "random"
 AGENT_NAME["LLMAgent_llama3.2_GridConfig_1"] = "Llama 3.2 (no mem)"
+
 AGENT_NAME["LLMMemoryAgent_codellama_GridMemoryConfig_1"] = "CodeLlama"
 AGENT_NAME["LLMMemoryAgent_gemma2_GridMemoryConfig_1"] = "Gemma 2"
 AGENT_NAME["LLMMemoryAgent_llama3.2_GridMemoryConfig_1"] = "Llama 3.2"
+
+AGENT_NAME["LLMMemoryAgent_codellama_GridMemoryConfig_2"] = "CodeLlama"
+AGENT_NAME["LLMMemoryAgent_gemma2_GridMemoryConfig_2"] = "Gemma 2"
+AGENT_NAME["LLMMemoryAgent_llama3.2_GridMemoryConfig_2"] = "Llama 3.2"
 
 
 def generate_plot(exp_name, title, plot_name):
@@ -31,7 +36,7 @@ def generate_plot(exp_name, title, plot_name):
       Y.append(reward)
 
     print(agent_ID)
-    plt.plot(X, Y, label=AGENT_NAME[agent_ID])
+    plt.plot(X, Y, alpha=.7, label=AGENT_NAME[agent_ID])
 
   path = os.path.join(PLOT_SAVE_DIR, plot_name + ".png")
 
@@ -46,8 +51,23 @@ def generate_plot(exp_name, title, plot_name):
 
 
 exp_name = "LLM_Model_Comparison_config2_MiniGrid-Empty-5x5-v0"
-title = "LLMRL Agent Reward Over Episodes on DoorKey Environment"
+title = "Imperative Tone Reward Over Episodes on Empty-5x5 Environment"
+plot_name = "LLM_Comp_2_MiniGrid-Empty-5x5-v0"
+generate_plot(exp_name, title, plot_name)
+
+exp_name = "LLM_Model_Comparison_config2_MiniGrid-DoorKey-5x5-v0"
+title = "Imperative Tone Reward Over Episodes on DoorKey-5x5 Environment"
 plot_name = "LLM_Comp_2_MiniGrid-DoorKey-5x5-v0"
+generate_plot(exp_name, title, plot_name)
+
+exp_name = "LLM_Model_Comparison_config2_MiniGrid-GoToObject-6x6-N2-v0"
+title = "Imperative Tone Reward Over Episodes on GoToObject-6x6 Environment"
+plot_name = "LLM_Comp_2_MiniGrid-GoToObject-6x6-N2-v0"
+generate_plot(exp_name, title, plot_name)
+
+exp_name = "LLM_Model_Comparison_config2_MiniGrid-MemoryS11-v0"
+title = "Imperative Tone Reward Over Episodes on MemoryS11 Environment"
+plot_name = "LLM_Comp_2_MiniGrid-MemoryS11-v0"
 generate_plot(exp_name, title, plot_name)
 
 exit()
