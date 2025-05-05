@@ -218,12 +218,12 @@ class GeneralistEvalCallback(EvalCallback):
         return continue_training
 
 
-def train_and_evaluate(agent_type, param_type, total_timesteps=300000, seed=0, episodes_per_env=5, eval_freq=10000):
+def train_and_evaluate(agent_type, param_type, total_timesteps=1000000, seed=0, episodes_per_env=5, eval_freq=10000):
     print("Training and evaluating...")
     train_env_ids = [
         "MiniGrid-Empty-5x5-v0",
         "MiniGrid-DoorKey-5x5-v0",
-        "MiniGrid-GoToObject-8x8-N2-v0",
+        "MiniGrid-GoToObject-6x6-N2-v0",
         "MiniGrid-MemoryS7-v0", 
         # "MiniGrid-KeyCorridorS3R3-v0",
         # "MiniGrid-UnlockPickup-v0",

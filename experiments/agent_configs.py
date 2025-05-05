@@ -75,8 +75,8 @@ dqn_optimized_hyperparams = {
 # Generalist hyperparameters (based on optimized but with larger buffer)
 dqn_generalist_hyperparams = {
     "learning_rate": 0.0001,  
-    "buffer_size": 50000,  # Larger buffer to store experiences from multiple environments
-    "learning_starts": 5000,  # Longer warmup to collect diverse experiences
+    "buffer_size": 500000,  # Larger buffer to store experiences from multiple environments
+    "learning_starts": 50000,  # Longer warmup to collect diverse experiences
     "batch_size": 128,
     "tau": 1.0,
     "gamma": 0.99,

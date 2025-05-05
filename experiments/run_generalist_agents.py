@@ -44,7 +44,7 @@ def run_generalist_experiment(agent_type, param_type, timesteps, episodes_per_en
         return False
 
 
-def run_all_experiments(timesteps=300000, agents=None, param_types=None, episodes_per_env=5, eval_freq=10000, verbose=False):
+def run_all_experiments(timesteps=1000000, agents=None, param_types=None, episodes_per_env=5, eval_freq=10000, verbose=False):
     """Run experiments for all specified agent and parameter combinations"""
     if agents is None:
         agents = ["DQN", "PPO", "Random"]
