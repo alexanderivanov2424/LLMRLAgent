@@ -26,9 +26,10 @@ from agents.llm_memory_agent import LLMMemoryAgent
 from agents.configs.grid_config import GridConfig_1
 from agents.configs.grid_context_config import GridContextConfig_1
 from agents.configs.grid_memory_config import GridMemoryConfig_1
+from agents.configs.grid_memory_config2 import GridMemoryConfig_2
 
 def test_env(env_name):
-    experiment = ExperimentData.load(f"LLM_Model_Comparison_{env_name}")
+    experiment = ExperimentData.load(f"LLM_Model_Comparison_config2_{env_name}")
 
     # Create the environment using our new MiniGridEnvironment class
     env = MiniGridEnvironment(env_name=env_name)
@@ -56,7 +57,7 @@ def test_env(env_name):
         env.get_valid_response(),
         env.observation_space,
         model="llama3.2",
-        config=GridMemoryConfig_1(),
+        config=GridMemoryConfig_2(),
     )
 
     llm_memory_agent_deepseek = LLMMemoryAgent(
@@ -64,7 +65,7 @@ def test_env(env_name):
         env.get_valid_response(),
         env.observation_space,
         model="deepseek-coder-v2",
-        config=GridMemoryConfig_1(),
+        config=GridMemoryConfig_2(),
     )
 
     llm_memory_agent_codellama = LLMMemoryAgent(
@@ -72,7 +73,7 @@ def test_env(env_name):
         env.get_valid_response(),
         env.observation_space,
         model="codellama",
-        config=GridMemoryConfig_1(),
+        config=GridMemoryConfig_2(),
     )
 
     llm_memory_agent_gemma = LLMMemoryAgent(
@@ -80,17 +81,16 @@ def test_env(env_name):
         env.get_valid_response(),
         env.observation_space,
         model="gemma2",
-        config=GridMemoryConfig_1(),
+        config=GridMemoryConfig_2(),
     )
 
     agents = [
-        #random_agent,
-        #llm_agent,
+        random_agent,
+        llm_agent,
         #llm_context_agent,
         llm_memory_agent,
         llm_memory_agent_codellama,
         llm_memory_agent_gemma,
-        llm_memory_agent_deepseek,
     ]
 
 
@@ -113,8 +113,8 @@ def test_env(env_name):
 
 
 ENVIRONMENTS = {
-    "Empty": "MiniGrid-Empty-5x5-v0",
-    "DoorKey": "MiniGrid-DoorKey-5x5-v0",
+    #"Empty": "MiniGrid-Empty-5x5-v0",
+    #"DoorKey": "MiniGrid-DoorKey-5x5-v0",
     "GoToObj": "MiniGrid-GoToObject-6x6-N2-v0",
     "MemoryS7": "MiniGrid-MemoryS11-v0",
 
