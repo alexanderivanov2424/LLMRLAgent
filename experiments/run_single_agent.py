@@ -158,7 +158,8 @@ def train_and_evaluate(
         device = "cpu"
 
     # Initialize learning curve callback
-    learning_curve_callback = LearningCurveCallback(eval_freq=10000, n_eval_episodes=5)
+    learning_curve_callback = LearningCurveCallback(eval_freq=100, n_eval_episodes=5)
+
 
     model = agent_class(
         "MlpPolicy",
