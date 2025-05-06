@@ -22,10 +22,6 @@ ENVIRONMENTS = {
     "DoorKey": "MiniGrid-DoorKey-5x5-v0",
     "GoToObj": "MiniGrid-GoToObject-6x6-N2-v0",
     "MemoryS7": "MiniGrid-MemoryS11-v0",
-    "KeyCorridor": "MiniGrid-KeyCorridorS6R3-v0",
-    "UnlockPickup": "MiniGrid-Unlock-v0",
-    "MultiRoom": "MiniGrid-MultiRoom-N4-S5-v0",
-    "LavaGap": "MiniGrid-LavaGapS5-v0",
 }
 
 # Environment-specific hyperparameters
